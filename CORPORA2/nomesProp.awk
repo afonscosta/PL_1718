@@ -1,5 +1,7 @@
 #!/usr/bin/gawk -f
 
-NF > 0 && NR >= 315 { 
-	if ($5 == "NP" && length($2) > 2 && $9 !~ /\(grup-nom/ && $9 ~ /\(w-[fm]s/) print NR, $2, $5, $9
+NF > 0 && NR >= 315 && $5 == "NP" { 
+	personagens[$2]++
 } 
+
+END { for ( i in personagens ) print personagens[i], " -> ", i }
