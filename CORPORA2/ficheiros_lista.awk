@@ -1,5 +1,11 @@
 #!/usr/bin/gawk -f
 
+        #HTML
+BEGIN { 
+        print "<html>\n<body>\n\n<h2 align=""center"">Adjetivos</h2><table bgcolor=""\"#f2f2f2\""" align=""center"" border='3'>" > "table.html"
+        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências\n\t</tr>" > "table.html"
+}
+
 NF > 0 && NR >= 315 && $4 ~ /^V.*/ { 
 	verbos_lema[$3]++;
         verbos[$3][$2]++;
@@ -21,7 +27,6 @@ NF > 0 && NR >= 315 && $4 ~ /^N.*/ {
 }
 
 
-#atenção que o ficheiro não é construido por ordem de frequencia mas sim ordem alfabética
 END {   
         #VERBOS
         asorti(verbos_lema, verbos_lema_sort); 
@@ -38,9 +43,20 @@ END {
         for (i in adjetivos_lema_sort){
                 asorti(adjetivos[adjetivos_lema_sort[i]], adjetivos_palavras);
                 print adjetivos_lema_sort[i], ":" > "adjetivos.txt";
+
+                for (a in adjetivos_palavras) conta++;
+
+                #HTML
+                print "\t<tr bgcolor=""\"#bfbfbf\""" align=""center"">\n\t\t<td rowspan="conta+1">"adjetivos_lema_sort[i]"</td>\n\t</tr>" > "table.html";
+                #print "\t<tr>\n\t\t<td rowspan="adjetivos_lema[adjetivos_lema_sort[i]]">"adjetivos_lema_sort[i]"</td>\n\t</tr>" > "table.html";
+                #print "\t<tr>\n\t\t<td>"adjetivos_lema_sort[i]"</td>\n\t</tr>" > "table.html";
+
                 for (j in adjetivos_palavras){
                         print  adjetivos_palavras[j], " -> ", adjetivos[adjetivos_lema_sort[i]][adjetivos_palavras[j]] > "adjetivos.txt";
+                        #HTML
+                        print "\t<tr>\n\t\t<td>"adjetivos_palavras[j]"</td>\n\t\t<td>"adjetivos[adjetivos_lema_sort[i]][adjetivos_palavras[j]]"</td>\n\t</tr>" > "table.html";
                 }
+                conta = 0;
         }
 
         #ADVERBIOS
@@ -63,7 +79,6 @@ END {
                 }
         }
 
-     #asorti(adjetivos, adjetivos_aux); for (i in adjetivos_aux) print adjetivos_aux[i], " -> ", adjetivos[adjetivos_aux[i]] > "adjetivos.txt";
-     #asorti(adverbios, adverbios_aux); for (i in adverbios_aux) print adverbios_aux[i], " -> ", adverbios[adverbios_aux[i]] > "adverbios.txt";    
-     #asorti(substantivos, substantivos_aux); for (i in substantivos_aux) print substantivos_aux[i], " -> ", substantivos[substantivos_aux[i]] > "substantivos.txt";    
+        #HTML
+        print "\t</table>\n\t</body>\n</html>" > "table.html";
  }
