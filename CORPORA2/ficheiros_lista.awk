@@ -114,6 +114,43 @@ END {
                 conta = 0;
         }
 
+        #CONSTRUCAO DE TABELAS DE TOPS
+        max_ant = 9999;
+        max = 0;
+        a = 1;
+
+        while (a <= 10){
+                for (i in verbos_lema){
+                        for (j in verbos[i]){
+                                if (verbos[i][j] >= max && verbos[i][j] <= max_ant){
+                                        
+                                        flag = 0;
+                                        for (x in top){
+                                                if (verbos[i][j] == top[x])
+                                                        flag = 1;               
+                                        }
+                                        if (flag == 0){
+                                                max = verbos[i][j];
+                                                max_lema = i;
+                                                max_palavra = j;
+                                        }
+                                }
+                        }
+                }
+                if (flag == 0){
+                        top[a] = max;
+                        top_lema[a] = max_lema;
+                        top_palavra[a]= max_palavra;
+                        a++;
+                }
+                flag = 0;
+                max_ant = max;
+                max = 0;
+        }
+
+        for (b in top)
+                print top[b], top_lema[b], top_palavra[b];
+
         #HTML
         print "\t</table>\n\t</body>\n</html>" > "substantivos.html";
         print "\t</table>\n\t</body>\n</html>" > "adjetivos.html";
