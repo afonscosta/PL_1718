@@ -136,8 +136,8 @@ END {
                                 if (verbos[i][j] >= max && verbos[i][j] <= max_ant){
                                         
                                         flag = 0;
-                                        for (x in top){
-                                                if (verbos[i][j] == top[x])
+                                        for (x in top_verbos_palavra){
+                                                if (j == top_verbos_palavra[x])
                                                         flag = 1;               
                                         }
                                         if (flag == 0){
@@ -149,9 +149,9 @@ END {
                         }
                 }
                 if (flag == 0){
-                        top[a] = max;
-                        top_lema[a] = max_lema;
-                        top_palavra[a]= max_palavra;
+                        top_verbos[a] = max;
+                        top_verbos_lema[a] = max_lema;
+                        top_verbos_palavra[a]= max_palavra;
                         a++;
                 }
                 flag = 0;
@@ -159,11 +159,11 @@ END {
                 max = 0;
         }
 
-        for (b in top){
-                print top[b], top_lema[b], top_palavra[b];
-                print "<tr><td>"top_lema[b]"</td><td>"top_palavra[b]"</td><td>"top[b]"</td></tr>" > "verbos.html";
+        for (b = 1; b <= 10; b++){
+                print top_verbos[b], top_verbos_lema[b], top_verbos_palavra[b];
+                print "<tr>\n\t<td>" top_verbos_lema[b] "</td><td>" top_verbos_palavra[b] "</td><td>"top_verbos[b]"</td>\n</tr>\n" > "verbos.html";
         }
         
-        print "</table>\n\t</body>\n</html>" > "verbos.html";
+        print "</table>\n</body>\n</html>" > "verbos.html";
 
 }
