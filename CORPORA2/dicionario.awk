@@ -11,7 +11,8 @@ END{
         asorti(dicionario[palavras[i]], definicoes);
         print palavras[i], ":";
         for(j in definicoes){
-            print definicoes[j], " -- ", dicionario[palavras[i]][definicoes[j]];
+	    split(definicoes[j],pos, SUBSEP, seps);
+            print pos[0], "»» ", pos[1],  "-- ", dicionario[palavras[i]][definicoes[j]];
         }
     }
 }
