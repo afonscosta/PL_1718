@@ -2,17 +2,17 @@
 
         #HTML
 BEGIN { 
-        print "<html>\n<body>\n\n<h2 align=""center"">Verbos</h2><table bgcolor=""\"#f2f2f2\""" align=""center"" border='3'>" > "verbos.html"
-        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências\n\t</tr>" > "verbos.html"
+        print "<html>\n<body>\n\n<h2 align=""\"center\""">Verbos</h2><table bgcolor=""\"#f2f2f2\""" align=""\"center\""" border='3'>" > "verbos.html"
+        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências</th>\n\t</tr>" > "verbos.html"
 
-        print "<html>\n<body>\n\n<h2 align=""center"">Adjetivos</h2><table bgcolor=""\"#f2f2f2\""" align=""center"" border='3'>" > "adjetivos.html"
-        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências\n\t</tr>" > "adjetivos.html"
+        print "<html>\n<body>\n\n<h2 align=""\"center\""">Adjetivos</h2><table bgcolor=""\"#f2f2f2\""" align=""\"center\""" border='3'>" > "adjetivos.html"
+        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências</th>\n\t</tr>" > "adjetivos.html"
 
-        print "<html>\n<body>\n\n<h2 align=""center"">Adverbios</h2><table bgcolor=""\"#f2f2f2\""" align=""center"" border='3'>" > "adverbios.html"
-        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências\n\t</tr>" > "adverbios.html"
+        print "<html>\n<body>\n\n<h2 align=""\"center\""">Adverbios</h2><table bgcolor=""\"#f2f2f2\""" align=""\"center\""" border='3'>" > "adverbios.html"
+        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências</th>\n\t</tr>" > "adverbios.html"
 
-        print "<html>\n<body>\n\n<h2 align=""center"">Substantivos</h2><table bgcolor=""\"#f2f2f2\""" align=""center"" border='3'>" > "substantivos.html"
-        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências\n\t</tr>" > "substantivos.html"
+        print "<html>\n<body>\n\n<h2 align=""\"center\""">Substantivos</h2><table bgcolor=""\"#f2f2f2\""" align=""\"center\""" border='3'>" > "substantivos.html"
+        print "\t<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th>\n\t\t<th>Palavra</th>\n\t\t<th>Ocorrências</th>\n\t</tr>" > "substantivos.html"
 
 }
 NF > 0 && NR >= 315 && $4 ~ /^V.*/ { 
@@ -114,7 +114,18 @@ END {
                 conta = 0;
         }
 
+        #HTML
+        print "\t</table>" > "verbos.html";
+        print "\t</table>" > "adjetivos.html";
+        print "\t</table>" > "adverbios.html";
+        print "\t</table>" > "substantivos.html";
+
         #CONSTRUCAO DE TABELAS DE TOPS
+        
+        print "<h2 align=""\"center\""">Top 10 Ocorrências</h2>" > "verbos.html";
+        print "\n<table align=""\"center\""" border='3'>\n\t\t" > "verbos.html"; 
+        print "<tr bgcolor=""\"grey\""">\n\t\t<th>Lema</th><th>Palavra</th><th>Ocorrências</th>\n\t</tr>" > "verbos.html"
+
         max_ant = 9999;
         max = 0;
         a = 1;
@@ -148,12 +159,11 @@ END {
                 max = 0;
         }
 
-        for (b in top)
+        for (b in top){
                 print top[b], top_lema[b], top_palavra[b];
+                print "<tr><td>"top_lema[b]"</td><td>"top_palavra[b]"</td><td>"top[b]"</td></tr>" > "verbos.html";
+        }
+        
+        print "</table>\n\t</body>\n</html>" > "verbos.html";
 
-        #HTML
-        print "\t</table>\n\t</body>\n</html>" > "substantivos.html";
-        print "\t</table>\n\t</body>\n</html>" > "adjetivos.html";
-        print "\t</table>\n\t</body>\n</html>" > "adverbios.html";
-        print "\t</table>\n\t</body>\n</html>" > "substantivos.html";
- }
+}
