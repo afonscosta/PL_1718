@@ -2,10 +2,10 @@
 
         #HTML
 BEGIN { 
-        print "<html>\n<body>\n\n<h1 align=""\"center\""">Verbos</h1>" > "verbos.html"
-        print "<html>\n<body>\n\n<h1 align=""\"center\""">Adjetivos</h1>" > "adjetivos.html"
-        print "<html>\n<body>\n\n<h1 align=""\"center\""">Advérbios</h1>" > "adverbios.html"
-        print "<html>\n<body>\n\n<h1 align=""\"center\""">Substantivos</h1>" > "substantivos.html"
+        print "<html>\n<head><meta charset=\"UTF-8\"></head>\n<body>\n\n<h1 align=""\"center\""">Verbos</h1>" > "verbos.html"
+        print "<html>\n<head><meta charset=\"UTF-8\"></head>\n<body>\n\n<h1 align=""\"center\""">Adjetivos</h1>" > "adjetivos.html"
+        print "<html>\n<head><meta charset=\"UTF-8\"></head>\n<body>\n\n<h1 align=""\"center\""">Advérbios</h1>" > "adverbios.html"
+        print "<html>\n<head><meta charset=\"UTF-8\"></head>\n<body>\n\n<h1 align=""\"center\""">Substantivos</h1>" > "substantivos.html"
 
 }
 NF > 0 && NR >= 315 && $4 ~ /^V.*/ { 
