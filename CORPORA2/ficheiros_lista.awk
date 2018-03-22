@@ -159,11 +159,58 @@ END {
                 max = 0;
         }
 
+        max_lema = 0;
+        max_palavra = 0;
+
+        max_ant = 9999;
+        max = 0;
+        c = 1;
+
+        while (c <= 10){
+                for (n in adjetivos_lema){
+                        for (o in adjetivos[n]){
+                                if (adjetivos[n][o] >= max && adjetivos[n][o] <= max_ant){
+                                        
+                                        flag = 0;
+                                        for (w in top_adjetivos_palavra){
+                                                if (o == top_adjetivos_palavra[w]){
+                                                    print "TRUE";
+                                                    flag = 1;
+                                                    max_ant--;
+                                                    max++;
+                                                }
+                                        }
+                                        if (flag == 0){
+                                                max = adjetivos[n][o];
+                                                max_lema = n;
+                                                max_palavra = o;
+                                        }
+                                }
+                        }
+                }
+                if (flag == 0){
+                        top_adjetivos[c] = max;
+                        print max, max_ant;
+                        top_adjetivos_lema[c] = max_lema;
+                        top_adjetivos_palavra[c]= max_palavra;
+                        c++;
+                        max_ant = max;
+                }
+                flag = 0;
+                max = 0;
+        }
+
+        
+
         for (b = 1; b <= 10; b++){
-                print top_verbos[b], top_verbos_lema[b], top_verbos_palavra[b];
+                #print top_verbos[b], top_verbos_lema[b], top_verbos_palavra[b];
                 print "<tr>\n\t<td>" top_verbos_lema[b] "</td><td>" top_verbos_palavra[b] "</td><td>"top_verbos[b]"</td>\n</tr>\n" > "verbos.html";
+
+                print "adjetivos", top_adjetivos[b], top_adjetivos_lema[b], top_adjetivos_palavra[b];
+                print "<tr>\n\t<td>" top_adjetivos_lema[b] "</td><td>" top_adjetivos_palavra[b] "</td><td>"top_adjetivos[b]"</td>\n</tr>\n" > "adjetivos.html";
         }
         
         print "</table>\n</body>\n</html>" > "verbos.html";
+        print "</table>\n</body>\n</html>" > "adjetivos.html";
 
 }
