@@ -22,7 +22,7 @@ END{
 	    #printf("    <palavra>%s\n", pos[1]);
 	    print "    <palavra>", pos[1] > "dict.xml";
 	    #printf("    <pos>%s</pos>\n", pos[2]);
-	    print "    <pos>", pos[2]  > "dict.xml";
+	    print "    <pos>", pos[2], "</pos>"  > "dict.xml";
 	    #printf("    </palavra>\n");
 	    print "    </palavra>"  > "dict.xml";
             #print "	", pos[1], "»» ", pos[2];#,  "-- ", dicionario[palavras[i]][definicoes[j]];
