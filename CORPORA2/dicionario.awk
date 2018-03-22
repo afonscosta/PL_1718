@@ -12,7 +12,7 @@ END{
         print palavras[i], ":";
         for(j in definicoes){
 	    split(definicoes[j],pos, SUBSEP, seps);
-            print pos[0], "»» ", pos[1],  "-- ", dicionario[palavras[i]][definicoes[j]];
+            print pos[0], "»» ", pos[1], "## ", pos[2],  "-- ", dicionario[palavras[i]][definicoes[j]];
         }
     }
 }
