@@ -8,13 +8,13 @@ BEGIN {
         print "<html>\n<head><meta charset=\"UTF-8\"></head>\n<body>\n\n<h1 align=""\"center\""">Substantivos</h1>" > "substantivos.html"
 
 }
-NF > 0 && NR >= 315 && $4 ~ /^V.*/ { 
+NF > 0 && $4 ~ /^V.*/ { 
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
         verbos_lema[$3]++;
         verbos[$3][$2]++;
 } 
-NF > 0 && NR >= 315 && $4 ~ /^A.*/ {
+NF > 0 && $4 ~ /^A.*/ {
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
         adjetivos_lema[$3]++;
@@ -22,14 +22,14 @@ NF > 0 && NR >= 315 && $4 ~ /^A.*/ {
        
 }
 
-NF > 0 && NR >= 315 && $4 ~ /^R.*/ {
+NF > 0 && $4 ~ /^R.*/ {
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
         adverbios_lema[$3]++ 
         adverbios[$3][$2]++;
 }
 
-NF > 0 && NR >= 315 && $4 ~ /^N.*/ {
+NF > 0 && $4 ~ /^N.*/ {
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
         substantivos_lema[$3]++
