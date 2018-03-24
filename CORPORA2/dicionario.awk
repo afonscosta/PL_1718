@@ -1,7 +1,7 @@
 #!/usr/bin/gawk -f
 
 
-NF > 0 && $5 !~ /^F.+/ {
+NF > 0 && $5 !~ /^F.*/ {
     dic_palavras[$3]++;
     dicionario[$3][$2, $5]++;
 }
