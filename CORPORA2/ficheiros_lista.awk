@@ -17,23 +17,23 @@ NF > 0 && NR >= 315 && $4 ~ /^V.*/ {
 NF > 0 && NR >= 315 && $4 ~ /^A.*/ {
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
-       adjetivos_lema[$3]++;
-       adjetivos[$3][$2]++;
+        adjetivos_lema[$3]++;
+        adjetivos[$3][$2]++;
        
 }
 
 NF > 0 && NR >= 315 && $4 ~ /^R.*/ {
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
-       adverbios_lema[$3]++ 
-       adverbios[$3][$2]++;
+        adverbios_lema[$3]++ 
+        adverbios[$3][$2]++;
 }
 
 NF > 0 && NR >= 315 && $4 ~ /^N.*/ {
         gsub(/_/, " ", $3);
         gsub(/_/, " ", $2);
-       substantivos_lema[$3]++
-       substantivos[$3][$2]++;
+        substantivos_lema[$3]++
+        substantivos[$3][$2]++;
 }
 
 
@@ -82,6 +82,7 @@ END {
             }
         }
 
+        a = 0;
         for (i in adverbios_lema){
             for (j in adverbios[i]){
                 if (a < 10){
@@ -93,6 +94,7 @@ END {
             }
         }
 
+        a = 0;
         for (i in substantivos_lema){
             for (j in substantivos[i]){
                 if (a < 10){
