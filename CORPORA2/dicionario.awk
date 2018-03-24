@@ -12,9 +12,8 @@ END{
     asorti(dic_palavras, palavras);
     for(i in palavras){
         asorti(dicionario[palavras[i]], definicoes);
-	print "  <termo>" > "dict.xml";
 	gsub(/&/, "&amp;", palavras[i]);
-	print "    <lema>", palavras[i], "</lema >" > "dict.xml";
+	print "  <lema>", palavras[i] > "dict.xml";
         for(j in definicoes){
 	    split(definicoes[j],pos, SUBSEP, seps);
 	    gsub(/&/, "&amp;", pos[1]);
@@ -22,7 +21,7 @@ END{
 	    print "    <pos>", pos[2], "</pos>"  > "dict.xml";
 	    print "    </palavra>"  > "dict.xml";
         }
-	print "  </termo>" > "dict.xml";
+	print "  </lema>" > "dict.xml";
     }
     print "</dicionario>" > "dict.xml";
 }
