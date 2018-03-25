@@ -1,7 +1,7 @@
 #!/usr/bin/gawk -f
 
 
-NF > 0 && $5 !~ /^F.*/ {
+NF > 0 && $5 !~ /^F.*/ && $5 !~ /-/ {
     dic_palavras[$3]++;
     dicionario[$3][$2, $5]++;
 }
@@ -13,12 +13,13 @@ END{
     for(i in palavras){
         asorti(dicionario[palavras[i]], definicoes);
 	gsub(/&/, "&amp;", palavras[i]);
-	print "  <lema>", palavras[i] > "dict.xml";
+	print "  <lema id=\"", palavras[i], "\">" > "dict.xml";
         for(j in definicoes){
 	    split(definicoes[j],pos, SUBSEP, seps);
 	    gsub(/&/, "&amp;", pos[1]);
-	    print "    <palavra>", pos[1] > "dict.xml";
-	    print "    <pos>", pos[2], "</pos>"  > "dict.xml";
+	    gsub(/\"/, "&quot;", pos[1]);
+	    print "    <palavra id=\"", pos[1], "\">" > "dict.xml";
+	    print "      <pos>", pos[2], "</pos>"  > "dict.xml";
 	    print "    </palavra>"  > "dict.xml";
         }
 	print "  </lema>" > "dict.xml";
