@@ -66,7 +66,7 @@ BEGIN {
 	print "\\label{fig:plot}"
 	print "\\end{figure}"
 
-	print "O comparativo presente no gráfico permite concluir informações bastantes curiosas. Nomeadamente, que a personagem \textit{Harry Potter é mais mencionada no segundo livro. Mais ainda no primeiro livro a personagem \\textit{Hagrid} é a terceira mais frequente, no entanto no segundo livro esta passa a ser a \\textit{Hermione}. O mesmo acontece com o \textit{Snape} e o \\textit{Dumbledore}, respetivamente."
+	print "O comparativo presente no gráfico permite concluir informações bastantes curiosas. Nomeadamente, que a personagem \\textit{Harry Potter} é mais mencionada no segundo livro. Mais ainda no primeiro livro a personagem \\textit{Hagrid} é a terceira mais frequente, no entanto no segundo livro esta passa a ser a \\textit{Hermione}. O mesmo acontece com o \\textit{Snape} e o \\textit{Dumbledore}, respetivamente."
 
 	print "\\newpage"
 
