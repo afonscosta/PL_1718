@@ -9,9 +9,12 @@ END {
 
 	PROCINFO["sorted_in"] = "@val_num_desc"
 
-	print "HP1", "HP2"
+	print "Title" , "HP1", "HP2"
 
 	for (i in pers_hp1) {
-		print "\"" i "\"", pers_hp1[i], pers_hp2[i]
+		if (i in pers_hp2)
+			print "\"" i "\"", pers_hp1[i], pers_hp2[i]
+		else
+			print "\"" i "\"", pers_hp1[i], 0
 	}
 }
