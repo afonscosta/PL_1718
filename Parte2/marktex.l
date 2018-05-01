@@ -44,6 +44,8 @@ void endDocument(){
 
 int main(int argc, char* argv[]){
 	yyscan_t scanner;
+	yylex_init(&scanner);
+	YY_BUFFER_STATE buffer;
 	if (argc == 1){
 		out = stdout;
 		beginDocument();
@@ -55,11 +57,11 @@ int main(int argc, char* argv[]){
 			char s[500];
 			sprintf(s, "%s.tex", argv[i]);
 			out = fopen(s, "w");
-			yyin = fopen(argv[i], "r");
+			buffer = yy_scan_string(argv[i], scanner);
 			beginDocument();
 			yylex(scanner);
 			endDocument();
-			fclose(out);
+			yy_delete_buffer(buffer, scanner);
 		}
 	}
 }
