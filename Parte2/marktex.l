@@ -1,5 +1,5 @@
 %option reentrant stack noyywrap
-%x lista italico negrito sublinhado riscado titulo
+%x lista italic bold under sout sect subsect subsubsect
 %{
 #include <stdlib.h>
 #include <string.h>
@@ -12,19 +12,41 @@ FILE* out;
 
 <lista>^[\n]			{ BEGIN 0; }
 
-<italico>(\*|\_)		{printf("}");
+^#\ .+\n			{yytext[yyleng - 1] = '\0';
+				 printf("\\section{%s}\n", yytext + 2);}
+
+
+^#{2}\ .+\n			{yytext[yyleng - 1] = '\0';
+				 printf("\\subsection{%s}\n", yytext + 3);}
+
+
+^#{3}\ .+\n			{yytext[yyleng - 1] = '\0';
+				 printf("\\subsubsection{%s}\n", yytext + 4);}
+
+<italic>\/			{printf("}");
 				 yy_pop_state(yyscanner);}
 
-
-<negrito>(\*\*|\_\_)		{printf("}");
+<bold>\*			{printf("}");
 				 yy_pop_state(yyscanner);}
 
-<*>(\*|\_)			{printf("\\emph{");
-				 yy_push_state(italico, yyscanner);}
+<sout>~				{printf("}");
+				 yy_pop_state(yyscanner);}
+
+<under>_			{printf("}");
+				 yy_pop_state(yyscanner);}
+
+<*>\/				{printf("\\textit{");
+				 yy_push_state(italic, yyscanner);}
 
 
-<*>(\*\*|\_\_)			{printf("\\textbf{");
-				 yy_push_state(negrito, yyscanner);}
+<*>\*				{printf("\\textbf{");
+				 yy_push_state(bold, yyscanner);}
+
+<*>~				{printf("\\sout{");
+				 yy_push_state(sout, yyscanner);}
+
+<*>_				{printf("\\underline{");
+				 yy_push_state(under, yyscanner);}
 
 .				;
 %%
