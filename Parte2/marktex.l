@@ -1,4 +1,4 @@
-%option reentrant stack noyywrap
+%option reentrant stack
 %x lista italic bold under sout title
 %{
 #include <stdlib.h>
@@ -75,6 +75,7 @@ int main(int argc, char* argv[]){
 	yyscan_t scanner;
 	yylex_init(&scanner);
 	YY_BUFFER_STATE buffer;
+	FILE *in;
 	if (argc == 1){
 		out = stdout;
 		beginDocument();
@@ -84,9 +85,12 @@ int main(int argc, char* argv[]){
 	else {
 		for (int i = 1; i < argc; i++){
 			char s[500];
+			sprintf(s, "%s", argv[i]);
+			in = fopen(s, "r");
 			sprintf(s, "%s.tex", argv[i]);
 			out = fopen(s, "w");
-			buffer = yy_scan_string(argv[i], scanner);
+			buffer = yy_create_buffer(in, YY_BUF_SIZE, scanner);
+			yy_switch_to_buffer(buffer, scanner);
 			beginDocument();
 			yylex(scanner);
 			endDocument();
