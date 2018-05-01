@@ -12,17 +12,19 @@ FILE* out;
 
 <lista>^[\n]			{ BEGIN 0; }
 
-<*>(\*|\_)[^*_]			{printf("\\emph{%s", yytext);
-				 yy_push_state(italico, yyscanner);
-				 printf("}");}
+<italico>(\*|\_)		{printf("}");
+				 yy_pop_state(yyscanner);}
 
-<*>(\*\*|\_\_)[^*]		{printf("\\textbf{%s", yytext);
-				 yy_push_state(negrito, yyscanner);
-				 printf("}");}
 
-<italico>(\*|\_)		{yy_pop_state(yyscanner);}
+<negrito>(\*\*|\_\_)		{printf("}");
+				 yy_pop_state(yyscanner);}
 
-<negrito>(\*\*|\_\_) 
+<*>(\*|\_)			{printf("\\emph{");
+				 yy_push_state(italico, yyscanner);}
+
+
+<*>(\*\*|\_\_)			{printf("\\textbf{");
+				 yy_push_state(negrito, yyscanner);}
 
 .				;
 %%
