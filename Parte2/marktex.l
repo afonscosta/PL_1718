@@ -1,5 +1,5 @@
 %option reentrant stack noyywrap
-%x lista italic bold under sout
+%x lista italic bold under sout title
 %{
 #include <stdlib.h>
 #include <string.h>
@@ -12,16 +12,21 @@ FILE* out;
 
 <lista>^[\n]			{ BEGIN 0; }
 
-^#\ .+\n			{yytext[yyleng - 1] = '\0';
-				 printf("\\section{%s}\n", yytext + 2);}
+^#{1,3}\ 			{switch(yyleng){
+					case 2 :
+						printf("\\section{");
+						break;
+					case 3 :
+						printf("\\subsection{");
+						break;
+					default :
+						printf("\\subsubsection{");
+				 }
+				 yy_push_state(title, yyscanner);}
 
 
-^#{2}\ .+\n			{yytext[yyleng - 1] = '\0';
-				 printf("\\subsection{%s}\n", yytext + 3);}
-
-
-^#{3}\ .+\n			{yytext[yyleng - 1] = '\0';
-				 printf("\\subsubsection{%s}\n", yytext + 4);}
+<title>\n			{printf("}\n");
+				 yy_pop_state(yyscanner);}
 
 <italic>\/			{printf("}");
 				 yy_pop_state(yyscanner);}
