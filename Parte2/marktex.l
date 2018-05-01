@@ -1,5 +1,5 @@
 %option reentrant stack noyywrap
-%x lista italic bold under sout sect subsect subsubsect
+%x lista italic bold under sout
 %{
 #include <stdlib.h>
 #include <string.h>
