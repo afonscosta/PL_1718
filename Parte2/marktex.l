@@ -1,23 +1,69 @@
-%x lista 
+%x dic 
 %{
 #include <stdlib.h>
 #include <string.h>
+
 FILE* out;
+char buffer[1000];
+
+char *substring(char *string, int position, int length) 
+{
+   char *pointer;
+   int c;
+ 
+   pointer = malloc(length+1);
+ 
+   if( pointer == NULL )
+       exit(EXIT_FAILURE);
+ 
+   for( c = 0 ; c < length ; c++ ) 
+      *(pointer+c) = *((string+position-1)+c);       
+ 
+   *(pointer+c) = '\0';
+ 
+   return pointer;
+}
+
+void replace(char* string, char* token){
+
+	char *f, *e;
+	int length = strlen(string);
+
+	for (int i = 0; i < string[i] != '\0'; i++){
+		if (string[i] == token[0] && string[i + 1] == token[1]){
+			f = substring(string, 1, i );
+			e = substring(string, i + 3, length - i -2);
+			//printf("%s - - %s\n",f, e);
+			
+			strcpy(string, "");
+			sprintf(string, "\\textbf{%s}", f);
+			//strcat(string, f);
+			free(f);
+
+			strcat(string, " $\\bullet$\\ ");
+			strcat(string, e);
+			//printf("TESTE - %s\n", string);
+			free(e);
+		}
+	}
+}
 
 %}
+
 %%
 
-^[0-9]\.			{ BEGIN lista; }
+^.+->.+									{
+									  char *aux = strdup(yytext);
+									  //printf("%s\n", aux);
+									  replace(aux, "->");
+									  printf("%s \n", aux);
+									}
 
-<lista>^[\n]			{ BEGIN 0; }
+.+									;
 
-
-
-
-
-
-.				;
 %%
+
+
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
 	printf("\\usepackage[portuguese]{babel}\n\n");
