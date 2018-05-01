@@ -1,4 +1,5 @@
-%x lista 
+%option reentrant stack noyywrap
+%x lista italico negrito sublinhado riscado titulo
 %{
 #include <stdlib.h>
 #include <string.h>
@@ -11,10 +12,17 @@ FILE* out;
 
 <lista>^[\n]			{ BEGIN 0; }
 
+<*>(\*|\_)[^*_]			{printf("\\emph{%s", yytext);
+				 yy_push_state(italico, yyscanner);
+				 printf("}");}
 
+<*>(\*\*|\_\_)[^*]		{printf("\\textbf{%s", yytext);
+				 yy_push_state(negrito, yyscanner);
+				 printf("}");}
 
+<italico>(\*|\_)		{yy_pop_state(yyscanner);}
 
-
+<negrito>(\*\*|\_\_) 
 
 .				;
 %%
@@ -35,10 +43,11 @@ void endDocument(){
 }
 
 int main(int argc, char* argv[]){
+	yyscan_t scanner;
 	if (argc == 1){
 		out = stdout;
 		beginDocument();
-		yylex();
+		yylex(scanner);
 		endDocument();
 	}
 	else {
@@ -48,7 +57,7 @@ int main(int argc, char* argv[]){
 			out = fopen(s, "w");
 			yyin = fopen(argv[i], "r");
 			beginDocument();
-			yylex();
+			yylex(scanner);
 			endDocument();
 			fclose(out);
 		}
