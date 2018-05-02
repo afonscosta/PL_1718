@@ -24,6 +24,7 @@ FILE* out;
 				 }
 				 yy_push_state(title, yyscanner);}
 
+<*>\\[\/*~_]			{printf("%s", yytext + 1);}
 
 <title>\n			{printf("}\n");
 				 yy_pop_state(yyscanner);}
@@ -53,7 +54,7 @@ FILE* out;
 <*>_				{printf("\\underline{");
 				 yy_push_state(under, yyscanner);}
 
-.				;
+.				{ECHO;}
 %%
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
@@ -68,7 +69,7 @@ void beginDocument(){
 }
 
 void endDocument(){
-	printf("\\end{document}");
+	printf("\\end{document}\n");
 }
 
 int main(int argc, char* argv[]){
