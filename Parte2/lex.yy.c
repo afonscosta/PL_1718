@@ -463,49 +463,10 @@ char *yytext;
 FILE* out;
 char buffer[1000];
 
-char *substring(char *string, int position, int length) 
-{
-   char *pointer;
-   int c;
- 
-   pointer = malloc(length+1);
- 
-   if( pointer == NULL )
-       exit(EXIT_FAILURE);
- 
-   for( c = 0 ; c < length ; c++ ) 
-      *(pointer+c) = *((string+position-1)+c);       
- 
-   *(pointer+c) = '\0';
- 
-   return pointer;
-}
+char* replace(char* string, char* token);
+char *substring(char *string, int position, int length);
 
-void replace(char* string, char* token){
-
-	char *f, *e;
-	int length = strlen(string);
-
-	for (int i = 0; i < string[i] != '\0'; i++){
-		if (string[i] == token[0] && string[i + 1] == token[1]){
-			f = substring(string, 1, i );
-			e = substring(string, i + 3, length - i -2);
-			//printf("%s - - %s\n",f, e);
-			
-			strcpy(string, "");
-			sprintf(string, "\\textbf{%s}", f);
-			//strcat(string, f);
-			free(f);
-
-			strcat(string, " $\\bullet$\\ ");
-			strcat(string, e);
-			//printf("TESTE - %s\n", string);
-			free(e);
-		}
-	}
-}
-
-#line 509 "lex.yy.c"
+#line 470 "lex.yy.c"
 
 #define INITIAL 0
 #define dic 1
@@ -691,10 +652,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 53 "marktex.l"
+#line 14 "marktex.l"
 
 
-#line 698 "lex.yy.c"
+#line 659 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -780,25 +741,24 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 55 "marktex.l"
+#line 16 "marktex.l"
 {
 									  char *aux = strdup(yytext);
 									  //printf("%s\n", aux);
-									  replace(aux, "->");
-									  printf("%s \n", aux);
+									  printf("%s\n", replace(aux, "->"));
 									}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 62 "marktex.l"
+#line 22 "marktex.l"
 ;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 64 "marktex.l"
+#line 24 "marktex.l"
 ECHO;
 	YY_BREAK
-#line 802 "lex.yy.c"
+#line 762 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(dic):
 	yyterminate();
@@ -1799,7 +1759,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 64 "marktex.l"
+#line 24 "marktex.l"
 
 
 
@@ -1818,6 +1778,50 @@ void beginDocument(){
 
 void endDocument(){
 	printf("\\end{document}");
+}
+
+char *substring(char *string, int position, int length) 
+{
+   char *pointer;
+   int c;
+ 
+   pointer = malloc(length+1);
+ 
+   if( pointer == NULL )
+       exit(EXIT_FAILURE);
+ 
+   for( c = 0 ; c < length ; c++ ) 
+      *(pointer+c) = *((string+position-1)+c);       
+ 
+   *(pointer+c) = '\0';
+ 
+   return pointer;
+}
+
+char* replace(char* string, char* token){
+
+	char *f, *e;
+	int length = strlen(string);
+	char aux[10000];
+	strcpy(aux, string);
+
+	for (int i = 0; i < string[i] != '\0'; i++){
+		if (string[i] == token[0] && string[i + 1] == token[1]){
+			f = substring(string, 1, i );
+			e = substring(string, i + 3, length - i -2);
+			//printf("%s - - %s\n",f, e);
+			
+			strcpy(aux, "");
+			//sprintf(string, "\\textbf{%s}", f);
+			strcat(aux, f);
+			free(f);
+
+			strcat(aux, "$\\bullet$\\");
+			strcat(aux, e);
+			free(e);
+		}
+	}
+	return strdup(aux);
 }
 
 int main(int argc, char* argv[]){
