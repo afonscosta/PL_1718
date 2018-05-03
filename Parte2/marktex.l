@@ -26,6 +26,9 @@ void closeItemize(int l);
 %}
 
 %%
+
+^[\-*_]{3,}	{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
+
 ^.+->		{ yytext[yyleng - 2] = '\0';
 			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
 
