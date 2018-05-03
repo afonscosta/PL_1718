@@ -1,4 +1,3 @@
-
 marktex: lex.yy.c
 	gcc -o marktex lex.yy.c -lfl
 

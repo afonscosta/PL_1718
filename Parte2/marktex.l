@@ -6,13 +6,18 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 FILE* out;
+char buffer[1000];
+
+char* replace(char* string, char* token);
+char *substring(char *string, int position, int length);
 
 int listasEnum[4] = {0, 0, 0, 0};
 char listasItem[4] = {' ', ' ', ' ', ' '};
 
 void beginEnumerate(int l);
-void processEnumeratedItem();
+void processItem();
 void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
@@ -21,13 +26,28 @@ void closeItemize(int l);
 %}
 
 %%
+^.+->		{ yytext[yyleng - 2] = '\0';
+			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
+
+
+^#{1,3}\ 	{ switch(yyleng) {
+			      case 2 :
+				      printf("\\section{");
+					  break;
+				  case 3 :
+				      printf("\\subsection{");
+					  break;
+				  default :
+					  printf("\\subsubsection{"); 
+			  }
+			  yy_push_state(title); }
 
 ^[0-9]+\.					{ beginEnumerate(0); 
-						  	  processEnumeratedItem(0); 
+						  	  processItem(0); 
 						  	  BEGIN lista; }
 
-^[+\-*]						{ beginItemize(0, yytext[0]); 
-						  	  processItemizeItem(0); 
+^[+\-*]\ 					{ beginItemize(0, yytext[0]); 
+						  	  processItem(0); 
 						  	  BEGIN lista; }
 
 <lista>^[\n]				{ closeEnumerate(3);
@@ -40,77 +60,65 @@ void closeItemize(int l);
                               closeItemize(0);
 						  	  BEGIN 0; }
 
-<lista>^[+\-*]				{ closeItemize(1);
-							  processItemizeItem(0); }
+<lista>^[+\-*]\ 			{ closeItemize(1);
+							  processItem(0); }
 
-<lista>^\t[+\-*]			{ closeItemize(2);
+<lista>^\t[+\-*]\ 			{ closeItemize(2);
 							  beginItemize(1, yytext[0]);
-							  processItemizeItem(1); }
+							  processItem(1); }
 
-<lista>^\t\t[+\-*]			{ closeItemize(3);
+<lista>^\t\t[+\-*]\ 		{ closeItemize(3);
 						  	  beginItemize(2, yytext[0]);
-						      processItemizeItem(2); }
+						      processItem(2); }
 
-<lista>^\t\t\t[+\-*]		{ beginItemize(3, yytext[0]); 
-							  processItemizeItem(3); }
+<lista>^\t\t\t[+\-*]\ 		{ beginItemize(3, yytext[0]); 
+							  processItem(3); }
 
 <lista>^[0-9]+\.			{ closeEnumerate(1);
 						  	  beginEnumerate(0);
-						  	  processEnumeratedItem(0); }
+						  	  processItem(0); }
 
 <lista>^\t[0-9]+\.			{ closeEnumerate(2);
 							  beginEnumerate(1);
-							  processEnumeratedItem(1); }
+							  processItem(1); }
 
 <lista>^\t\t[0-9]+\.		{ closeEnumerate(3);
 						  	  beginEnumerate(2);
-						      processEnumeratedItem(2); }
+						      processItem(2); }
 
 <lista>^\t\t\t[0-9]+\.		{ beginEnumerate(3); 
-							  processEnumeratedItem(3); }
-
-^#{1,3}\ 			{switch(yyleng){
-					case 2 :
-						printf("\\section{");
-						break;
-					case 3 :
-						printf("\\subsection{");
-						break;
-					default :
-						printf("\\subsubsection{");
-				 }
-				 yy_push_state(title);}
-
-<*>\\[\/*~_]			{printf("%s", yytext + 1);}
-
-<title>\n			{printf("}\n");
-				 yy_pop_state();}
-
-<italic>\/			{printf("}");
-				 yy_pop_state();}
-
-<bold>\*			{printf("}");
-				 yy_pop_state();}
-
-<sout>~				{printf("}");
-				 yy_pop_state();}
-
-<under>_			{printf("}");
-				 yy_pop_state();}
+							  processItem(3); }
 
 
-<*>\/				{printf("\\textit{");
-				 yy_push_state(italic);}
+<title>\n		{ printf("}\n");
+				  yy_pop_state(); }
+
+<italic>\/		{ printf("}");
+				  yy_pop_state(); }
+
+<bold>\*		{ printf("}");
+				  yy_pop_state(); }
+
+<sout>~			{ printf("}");
+				  yy_pop_state(); }
+
+<under>_		{ printf("}");
+				  yy_pop_state(); }
 
 
-<*>\*				{printf("\\textbf{");
-				 yy_push_state(bold);}
+<*>\\[\/*~_]	{ printf("%s", yytext + 1); }
 
-<*>~				{printf("\\sout{");
-				 yy_push_state(sout);}
+<*>\/			{ printf("\\textit{");
+				  yy_push_state(italic); }
 
-<*>_				{printf("\\underline{");
-				 yy_push_state(under);}
+<*>\*			{ printf("\\textbf{");
+				  yy_push_state(bold); }
+
+<*>~			{ printf("\\sout{");
+				  yy_push_state(sout); }
+
+<*>_			{ printf("\\underline{");
+				  yy_push_state(under); }
 
 
 %%
@@ -124,7 +132,7 @@ void beginItemize(int l, char c) {
 	}
 }
 
-void processItemizeItem() {
+void processItem() {
 	printf("\\item "); 
 }
 
@@ -142,10 +150,6 @@ void beginEnumerate(int l) {
 		listasEnum[l] = 1;
 		printf("\\begin{legal}\n");
 	}
-}
-
-void processEnumeratedItem() {
-	printf("\\item ");
 }
 
 void closeEnumerate(int l) {
@@ -173,6 +177,7 @@ void beginDocument(){
 void endDocument(){
 	printf("\\end{document}\n");
 }
+
 
 int main(int argc, char* argv[]){
 	FILE *in;
