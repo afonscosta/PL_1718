@@ -3,8 +3,10 @@
 %{
 #include <stdlib.h>
 #include <string.h>
+FILE *in;
 FILE* out;
-
+yyscan_t scanner;
+YY_BUFFER_STATE buffer;
 %}
 %%
 
@@ -73,10 +75,7 @@ void endDocument(){
 }
 
 int main(int argc, char* argv[]){
-	yyscan_t scanner;
 	yylex_init(&scanner);
-	YY_BUFFER_STATE buffer;
-	FILE *in;
 	if (argc == 1){
 		out = stdout;
 		beginDocument();
