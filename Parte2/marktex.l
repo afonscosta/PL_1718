@@ -176,7 +176,6 @@ void endDocument(){
 
 int main(int argc, char* argv[]){
 	if (argc == 1){
-		out = stdout;
 		beginDocument();
 		yylex();
 		endDocument();
@@ -185,7 +184,7 @@ int main(int argc, char* argv[]){
 		for (int i = 1; i < argc; i++){
 			char s[500];
 			sprintf(s, "%s.tex", argv[i]);
-			out = fopen(s, "w");
+			freopen(s, "w", stdout);
 			beginDocument();
 			yylex();
 			endDocument();
