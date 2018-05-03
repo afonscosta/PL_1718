@@ -13,7 +13,7 @@ char *substring(char *string, int position, int length);
 %}
 
 %%
-
+[ \t\n]				;
 ^.+->				{yytext[yyleng - 2] = '\0';
 				printf("\\textbf{%s} $\\bullet$\\ ", yytext);
 				}
