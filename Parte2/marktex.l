@@ -1,6 +1,6 @@
 
 %option stack
-%x lista italic bold under sout title
+%x lista italic bold under sout title notas
 
 %{
 
@@ -8,13 +8,10 @@
 #include <string.h>
 
 FILE* out;
-char buffer[1000];
-
-char* replace(char* string, char* token);
-char *substring(char *string, int position, int length);
 
 int listasEnum[4] = {0, 0, 0, 0};
 char listasItem[4] = {' ', ' ', ' ', ' '};
+int intensidade = 0;
 
 void beginEnumerate(int l);
 void processItem();
@@ -22,6 +19,7 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
+void createToDo();
 
 %}
 
@@ -42,6 +40,13 @@ void closeItemize(int l);
 			  }
 			  yy_push_state(title); }
 
+!{1,3}				{ intensidade = yyleng; 
+				  	  BEGIN notas; }
+
+<notas>[^!]+!{1,3}	{ createToDo(); 
+					  intensidade = 0; 
+					  BEGIN 0; }
+
 ^[0-9]+\.					{ beginEnumerate(0); 
 						  	  processItem(0); 
 						  	  BEGIN lista; }
@@ -49,6 +54,7 @@ void closeItemize(int l);
 ^[+\-*]\ 					{ beginItemize(0, yytext[0]); 
 						  	  processItem(0); 
 						  	  BEGIN lista; }
+
 
 <lista>^[\n]				{ closeEnumerate(3);
 						  	  closeEnumerate(2);
@@ -122,6 +128,19 @@ void closeItemize(int l);
 
 
 %%
+void createToDo() {
+	yytext[yyleng-intensidade] = '\0';
+	switch(intensidade) {
+		case 1 :
+			printf("\\todo[color=green!40]{%s}", yytext);
+			break;
+		case 2 :
+			printf("\\todo[color=yellow!50]{%s}", yytext);
+			break;
+		default :
+			printf("\\todo[color=red!50]{%s}", yytext);
+	}
+}
 
 // LISTAS NÃO ORDENADAS
 void beginItemize(int l, char c) {
@@ -167,10 +186,14 @@ void beginDocument(){
 	printf("\\usepackage{blindtext}\n");
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
+	printf("\\usepackage{soul}\n");
+	printf("\\usepackage[colorlinks]{hyperref}\n");
+	printf("\\usepackage[colorinlistoftodos]{todonotes}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
-	printf("\\setlist[legal]{label*=\\arabic*.}\n\n");
+	printf("\\setlist[legal]{label*=\\arabic*.}\n");
+	printf("\\newcommand{\\hlfix}[2]{\\texthl{#1}\\todo{#2}}\n\n");
 	printf("\\begin{document}\n\n");
 }
 
