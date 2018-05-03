@@ -1,4 +1,3 @@
-
 %option stack
 %x lista italic bold under sout title
 
@@ -89,38 +88,34 @@ void closeItemize(int l);
 <lista>^\t\t\t[0-9]+\.		{ beginEnumerate(3); 
 							  processItem(3); }
 
+<title>\n			{printf("}\n");
+				 yy_pop_state();}
 
-<title>\n		{ printf("}\n");
-				  yy_pop_state(); }
+<italic>\/			{printf("}");
+				 yy_pop_state();}
 
-<italic>\/		{ printf("}");
-				  yy_pop_state(); }
+<bold>\*			{printf("}");
+				 yy_pop_state();}
 
-<bold>\*		{ printf("}");
-				  yy_pop_state(); }
+<sout>~				{printf("}");
+				 yy_pop_state();}
 
-<sout>~			{ printf("}");
-				  yy_pop_state(); }
-
-<under>_		{ printf("}");
-				  yy_pop_state(); }
-
+<under>_			{printf("}");
+				 yy_pop_state();}
 
 <*>\\[\/*~_]	{ printf("%s", yytext + 1); }
 
-<*>\/			{ printf("\\textit{");
-				  yy_push_state(italic); }
+<*>\/				{printf("\\textit{");
+				 yy_push_state(italic);}
 
-<*>\*			{ printf("\\textbf{");
-				  yy_push_state(bold); }
+<*>\*				{printf("\\textbf{");
+				 yy_push_state(bold);}
 
-<*>~			{ printf("\\sout{");
-				  yy_push_state(sout); }
+<*>~				{printf("\\sout{");
+				 yy_push_state(sout);}
 
-<*>_			{ printf("\\underline{");
-				  yy_push_state(under); }
-
-
+<*>_				{printf("\\underline{");
+				 yy_push_state(under);}
 %%
 
 // LISTAS NÃO ORDENADAS
@@ -180,7 +175,6 @@ void endDocument(){
 
 
 int main(int argc, char* argv[]){
-	FILE *in;
 	if (argc == 1){
 		beginDocument();
 		yylex();
@@ -189,13 +183,12 @@ int main(int argc, char* argv[]){
 	else {
 		for (int i = 1; i < argc; i++){
 			char s[500];
-			sprintf(s, "%s", argv[i]);
-			in = fopen(s, "r");
 			sprintf(s, "%s.tex", argv[i]);
 			freopen(s, "w", stdout);
 			beginDocument();
 			yylex();
 			endDocument();
+			fclose(out);
 		}
 	}
 }
