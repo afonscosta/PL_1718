@@ -13,13 +13,12 @@ char *substring(char *string, int position, int length);
 
 %%
 
-^.+->.+									{
+^.+->									{
 									  char *aux = strdup(yytext);
 									  //printf("%s\n", aux);
 									  printf("%s\n", replace(aux, "->"));
 									}
 
-.+									;
 
 %%
 
@@ -60,25 +59,21 @@ char *substring(char *string, int position, int length)
 
 char* replace(char* string, char* token){
 
-	char *f, *e;
-	int length = strlen(string);
+	char *f;
 	char aux[10000];
 	strcpy(aux, string);
 
 	for (int i = 0; i < string[i] != '\0'; i++){
 		if (string[i] == token[0] && string[i + 1] == token[1]){
 			f = substring(string, 1, i );
-			e = substring(string, i + 3, length - i -2);
 			//printf("%s - - %s\n",f, e);
 			
 			strcpy(aux, "");
-			//sprintf(string, "\\textbf{%s}", f);
-			strcat(aux, f);
+			sprintf(aux, "\\textbf{%s}", f);
+			//strcat(aux, f);
 			free(f);
 
 			strcat(aux, "$\\bullet$\\");
-			strcat(aux, e);
-			free(e);
 		}
 	}
 	return strdup(aux);
