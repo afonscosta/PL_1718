@@ -1,12 +1,9 @@
-%option reentrant stack
+%option stack
 %x lista italic bold under sout title
 %{
 #include <stdlib.h>
 #include <string.h>
-FILE *in;
 FILE* out;
-yyscan_t scanner;
-YY_BUFFER_STATE buffer;
 %}
 %%
 
@@ -16,86 +13,80 @@ YY_BUFFER_STATE buffer;
 
 ^#{1,3}\ 			{switch(yyleng){
 					case 2 :
-						fprintf(out,"\\section{");
+						printf("\\section{");
 						break;
 					case 3 :
-						fprintf(out,"\\subsection{");
+						printf("\\subsection{");
 						break;
 					default :
-						fprintf(out,"\\subsubsection{");
+						printf("\\subsubsection{");
 				 }
-				 yy_push_state(title, yyscanner);}
+				 yy_push_state(title);}
 
-<*>\\[\/*~_]			{fprintf(out,"%s", yytext + 1);}
+<*>\\[\/*~_]			{printf("%s", yytext + 1);}
 
-<title>\n			{fprintf(out,"}\n");
-				 yy_pop_state(yyscanner);}
+<title>\n			{printf("}\n");
+				 yy_pop_state();}
 
-<italic>\/			{fprintf(out,"}");
-				 yy_pop_state(yyscanner);}
+<italic>\/			{printf("}");
+				 yy_pop_state();}
 
-<bold>\*			{fprintf(out,"}");
-				 yy_pop_state(yyscanner);}
+<bold>\*			{printf("}");
+				 yy_pop_state();}
 
-<sout>~				{fprintf(out,"}");
-				 yy_pop_state(yyscanner);}
+<sout>~				{printf("}");
+				 yy_pop_state();}
 
-<under>_			{fprintf(out,"}");
-				 yy_pop_state(yyscanner);}
+<under>_			{printf("}");
+				 yy_pop_state();}
 
-<*>\/				{fprintf(out,"\\textit{");
-				 yy_push_state(italic, yyscanner);}
+<*>\/				{printf("\\textit{");
+				 yy_push_state(italic);}
 
 
-<*>\*				{fprintf(out,"\\textbf{");
-				 yy_push_state(bold, yyscanner);}
+<*>\*				{printf("\\textbf{");
+				 yy_push_state(bold);}
 
-<*>~				{fprintf(out,"\\sout{");
-				 yy_push_state(sout, yyscanner);}
+<*>~				{printf("\\sout{");
+				 yy_push_state(sout);}
 
-<*>_				{fprintf(out,"\\underline{");
-				 yy_push_state(under, yyscanner);}
+<*>_				{printf("\\underline{");
+				 yy_push_state(under);}
 
 .				;
 %%
 void beginDocument(){
-	fprintf(out,"\\documentclass[a4paper]{article}\n\n");
-	fprintf(out,"\\usepackage[portuguese]{babel}\n\n");
-	fprintf(out,"\\usepackage[utf8]{inputenc}\n");
-	fprintf(out,"\\usepackage{ulem}\n");
-	fprintf(out,"\\usepackage{blindtext}\n");
-	fprintf(out,"\\usepackage{scrextend}\n");
-	fprintf(out,"\\setkomafont{labelinglabel}{\\ttfamily}\n");
-	fprintf(out,"\\setkomafont{labelingseparator}{\\normalfont}\n\n");
-	fprintf(out,"\\begin{document}\n\n");
+	printf("\\documentclass[a4paper]{article}\n\n");
+	printf("\\usepackage[portuguese]{babel}\n\n");
+	printf("\\usepackage[utf8]{inputenc}\n");
+	printf("\\usepackage{ulem}\n");
+	printf("\\usepackage{blindtext}\n");
+	printf("\\usepackage{scrextend}\n");
+	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
+	printf("\\setkomafont{labelingseparator}{\\normalfont}\n\n");
+	printf("\\begin{document}\n\n");
 }
 
 void endDocument(){
-	fprintf(out,"\\end{document}\n");
+	printf("\\end{document}\n");
 }
 
 int main(int argc, char* argv[]){
-	yylex_init(&scanner);
 	if (argc == 1){
 		out = stdout;
 		beginDocument();
-		yylex(scanner);
+		yylex();
 		endDocument();
 	}
 	else {
 		for (int i = 1; i < argc; i++){
 			char s[500];
-			sprintf(s, "%s", argv[i]);
-			in = fopen(s, "r");
 			sprintf(s, "%s.tex", argv[i]);
 			out = fopen(s, "w");
-			yyset_out(out, scanner);
-			buffer = yy_create_buffer(in, YY_BUF_SIZE, scanner);
-			yy_switch_to_buffer(buffer, scanner);
 			beginDocument();
-			yylex(scanner);
+			yylex();
 			endDocument();
-			yy_delete_buffer(buffer, scanner);
+			fclose(out);
 		}
 	}
 }
