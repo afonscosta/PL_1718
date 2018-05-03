@@ -54,7 +54,7 @@ FILE* out;
 <*>_				{printf("\\underline{");
 				 yy_push_state(under, yyscanner);}
 
-.				{ECHO;}
+.				;
 %%
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
