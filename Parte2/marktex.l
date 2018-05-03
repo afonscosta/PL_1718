@@ -14,8 +14,8 @@ char *substring(char *string, int position, int length);
 
 %%
 
-^.+->				{char *aux = strdup(yytext);
-				printf("%s\n", replace(aux, "->"));
+^.+->				{yytext[yyleng - 2] = '\0';
+				printf("\\textbf{%s} $\\bullet$\\ ", yytext);
 				}
 
 ^#{1,3}\ 			{switch(yyleng){
@@ -77,45 +77,6 @@ void endDocument(){
 	printf("\\end{document}\n");
 }
 
-char *substring(char *string, int position, int length) 
-{
-   char *pointer;
-   int c;
- 
-   pointer = malloc(length+1);
- 
-   if( pointer == NULL )
-       exit(EXIT_FAILURE);
- 
-   for( c = 0 ; c < length ; c++ ) 
-      *(pointer+c) = *((string+position-1)+c);       
- 
-   *(pointer+c) = '\0';
- 
-   return pointer;
-}
-
-char* replace(char* string, char* token){
-
-	char *f;
-	char aux[10000];
-	strcpy(aux, string);
-
-	for (int i = 0; i < string[i] != '\0'; i++){
-		if (string[i] == token[0] && string[i + 1] == token[1]){
-			f = substring(string, 1, i );
-			//printf("%s - - %s\n",f, e);
-			
-			strcpy(aux, "");
-			sprintf(aux, "\\textbf{%s}", f);
-			//strcat(aux, f);
-			free(f);
-
-			strcat(aux, "$\\bullet$\\");
-		}
-	}
-	return strdup(aux);
-}
 
 int main(int argc, char* argv[]){
 	yyscan_t scanner;
