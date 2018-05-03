@@ -1,4 +1,5 @@
-%x dic 
+%option reentrant stack
+%x lista italic bold under sout title
 %{
 #include <stdlib.h>
 #include <string.h>
@@ -13,15 +14,52 @@ char *substring(char *string, int position, int length);
 
 %%
 
-^.+->									{
-									  char *aux = strdup(yytext);
-									  //printf("%s\n", aux);
-									  printf("%s\n", replace(aux, "->"));
-									}
+^.+->				{char *aux = strdup(yytext);
+				printf("%s\n", replace(aux, "->"));
+				}
+
+^#{1,3}\ 			{switch(yyleng){
+					case 2 :
+						printf("\\section{");
+						break;
+					case 3 :
+						printf("\\subsection{");
+						break;
+					default :
+						printf("\\subsubsection{");
+				 }
+				 yy_push_state(title, yyscanner);}
+
+<*>\\[\/*~_]			{printf("%s", yytext + 1);}
+
+<title>\n			{printf("}\n");
+				 yy_pop_state(yyscanner);}
+
+<italic>\/			{printf("}");
+				 yy_pop_state(yyscanner);}
+
+<bold>\*			{printf("}");
+				 yy_pop_state(yyscanner);}
+
+<sout>~				{printf("}");
+				 yy_pop_state(yyscanner);}
+
+<under>_			{printf("}");
+				 yy_pop_state(yyscanner);}
+
+<*>\/				{printf("\\textit{");
+				 yy_push_state(italic, yyscanner);}
 
 
+<*>\*				{printf("\\textbf{");
+				 yy_push_state(bold, yyscanner);}
+
+<*>~				{printf("\\sout{");
+				 yy_push_state(sout, yyscanner);}
+
+<*>_				{printf("\\underline{");
+				 yy_push_state(under, yyscanner);}
 %%
-
 
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
@@ -36,7 +74,7 @@ void beginDocument(){
 }
 
 void endDocument(){
-	printf("\\end{document}");
+	printf("\\end{document}\n");
 }
 
 char *substring(char *string, int position, int length) 
@@ -80,22 +118,29 @@ char* replace(char* string, char* token){
 }
 
 int main(int argc, char* argv[]){
+	yyscan_t scanner;
+	yylex_init(&scanner);
+	YY_BUFFER_STATE buffer;
+	FILE *in;
 	if (argc == 1){
 		out = stdout;
 		beginDocument();
-		yylex();
+		yylex(scanner);
 		endDocument();
 	}
 	else {
 		for (int i = 1; i < argc; i++){
 			char s[500];
+			sprintf(s, "%s", argv[i]);
+			in = fopen(s, "r");
 			sprintf(s, "%s.tex", argv[i]);
 			out = fopen(s, "w");
-			yyin = fopen(argv[i], "r");
+			buffer = yy_create_buffer(in, YY_BUF_SIZE, scanner);
+			yy_switch_to_buffer(buffer, scanner);
 			beginDocument();
-			yylex();
+			yylex(scanner);
 			endDocument();
-			fclose(out);
+			yy_delete_buffer(buffer, scanner);
 		}
 	}
 }

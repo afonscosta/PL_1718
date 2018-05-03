@@ -1,0 +1,17 @@
+trabalho principal:
+https://stackoverflow.com/questions/18304455/setting-getting-column-number-for-reentrant-flex-scanner
+https://www.cs.virginia.edu/~cr4bd/flex-manual/Extra-Reentrant-Argument.html
+https://www.cs.virginia.edu/~cr4bd/flex-manual/Reentrant-Functions.html#Reentrant-Functions
+https://www.cs.virginia.edu/~cr4bd/flex-manual/Reentrant-Example.html#Reentrant-Example
+https://stackoverflow.com/questions/43223943/figuring-out-flex-lexer-yy-push-state
+https://stackoverflow.com/questions/2634998/writing-re-entrant-lexer-with-flex
+https://sourceforge.net/p/flex/mailman/message/19022891/
+https://stackoverflow.com/questions/40505128/flex-bison-yyin-from-argv
+
+
+
+trabalho extra:
+https://tex.stackexchange.com/questions/782/what-are-the-available-documentclass-types-and-their-uses
+http://csrgxtu.github.io/2015/03/20/Writing-Mathematic-Fomulars-in-Markdown/
+http://blog.analogmachine.org/2011/05/16/top-10-latex-packages/
+https://tex.stackexchange.com/questions/161788/how-to-have-upside-down-text-in-body
