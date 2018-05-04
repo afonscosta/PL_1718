@@ -11,7 +11,6 @@ FILE* out;
 
 int listasEnum[4] = {0, 0, 0, 0};
 char listasItem[4] = {' ', ' ', ' ', ' '};
-int intensidade = 0;
 
 void beginEnumerate(int l);
 void processItem();
@@ -140,9 +139,8 @@ void createToDoIntense() {
 	int i;
 	for(i = 0; yytext[i] == '!' && i < yyleng; i++);
 	if (i != yyleng) {
-		intensidade = i;
-		yytext[yyleng-intensidade] = '\0';
-		switch(intensidade) {
+		yytext[yyleng - i] = '\0';
+		switch(i) {
 			case 1 :
 				printf("\\todo[color=green!40]{%s}", yytext + i);
 				break;
