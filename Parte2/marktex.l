@@ -244,15 +244,14 @@ void closeEnumerate(int l) {
 
 void processCodeBlock(){
 	printf("\\begin{lstlisting}");
-	int i = 0;
+	int i = 3;
 	if(yytext[3] != '\n'){
 		for(i = 3; yytext[i] != '\n'; i++);
 		yytext[i] = '\0';
 		printf("[language=%s]\n", yytext + 3);
-		i -= 2;
 		}
 	yytext[yyleng - 5] = '\0';
-	printf("%s\n\\end{lstlisting}\n", yytext + 3 + i);
+	printf("%s\n\\end{lstlisting}\n", yytext + 1 + i);
 }
 
 void beginDocument(){
