@@ -19,7 +19,7 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
-void createToDo();
+void createToDoIntense();
 
 %}
 
@@ -40,12 +40,14 @@ void createToDo();
 			  }
 			  yy_push_state(title); }
 
-!{1,3}				{ intensidade = yyleng; 
-				  	  BEGIN notas; }
+\$\$			{ yy_push_state(notas); }
 
-<notas>[^!]+!{1,3}	{ createToDo(); 
-					  intensidade = 0; 
-					  BEGIN 0; }
+<notas>\[		{ printf("\\hlfix{"); }
+<notas>\]\(		{ printf("}{"); }
+<notas>\)		{ printf("}~"); 
+				  yy_pop_state(); }
+
+!{1,3}[^!]+!{1,3}	{ createToDoIntense(); }
 
 ^[0-9]+\.					{ beginEnumerate(0); 
 						  	  processItem(0); 
@@ -128,17 +130,28 @@ void createToDo();
 
 
 %%
-void createToDo() {
-	yytext[yyleng-intensidade] = '\0';
-	switch(intensidade) {
-		case 1 :
-			printf("\\todo[color=green!40]{%s}", yytext);
-			break;
-		case 2 :
-			printf("\\todo[color=yellow!50]{%s}", yytext);
-			break;
-		default :
-			printf("\\todo[color=red!50]{%s}", yytext);
+
+void createToDoHighlight() {
+
+}
+
+void createToDoIntense() {
+	
+	int i;
+	for(i = 0; yytext[i] == '!' && i < yyleng; i++);
+	if (i != yyleng) {
+		intensidade = i;
+		yytext[yyleng-intensidade] = '\0';
+		switch(intensidade) {
+			case 1 :
+				printf("\\todo[color=green!40]{%s}", yytext + i);
+				break;
+			case 2 :
+				printf("\\todo[color=yellow!50]{%s}", yytext + i);
+				break;
+			default :
+				printf("\\todo[color=red!50]{%s}", yytext + i);
+		}
 	}
 }
 
