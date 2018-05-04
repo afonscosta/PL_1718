@@ -1,5 +1,5 @@
 %option stack
-%x lista italic bold under sout title
+%x lista italic bold under sout title color
 %{
 
 #include <stdlib.h>
@@ -104,7 +104,10 @@ void processCodeBlock();
 <under>_			{printf("}");
 				 yy_pop_state();}
 
-<*>\\[\/*~_']	{ printf("%s", yytext + 1); }
+<color>;			{printf("}");
+				 yy_pop_state();}
+
+<*>\\[\/*~_`]	{ printf("%s", yytext + 1); }
 
 <*>\/				{printf("\\textit{");
 				 yy_push_state(italic);}
@@ -117,6 +120,10 @@ void processCodeBlock();
 
 <*>_				{printf("\\underline{");
 				 yy_push_state(under);}
+
+<*>;[a-zA-Z][a-zA-Z!0-9]+\ 	{yytext[yyleng - 1] = '\0';
+				 printf("\\textcolor{%s}{", yytext + 1);
+				 yy_push_state(color);}
 
 <*>`.+`				{yytext[yyleng - 1] = '\0';
 				 printf("\\texttt{%s}", yytext + 1);}
@@ -182,6 +189,7 @@ void beginDocument(){
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
 	printf("\\usepackage{listings}\n");
+	printf("\\usepackage{xcolor}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
@@ -208,7 +216,6 @@ int main(int argc, char* argv[]){
 			beginDocument();
 			yylex();
 			endDocument();
-			fclose(out);
 		}
 	}
 }

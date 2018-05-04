@@ -15,3 +15,5 @@ https://tex.stackexchange.com/questions/782/what-are-the-available-documentclass
 http://csrgxtu.github.io/2015/03/20/Writing-Mathematic-Fomulars-in-Markdown/
 http://blog.analogmachine.org/2011/05/16/top-10-latex-packages/
 https://tex.stackexchange.com/questions/161788/how-to-have-upside-down-text-in-body
+https://www.sharelatex.com/learn/Using_colours_in_LaTeX
+http://www.ukern.de/tex/xcolor.html
