@@ -1,12 +1,13 @@
 %option stack
-%x lista italic bold under sout title
+
+%x lista italic bold under sout title notas
+
 %{
 
 #include <stdlib.h>
 #include <string.h>
 
 FILE* out;
-char buffer[1000];
 
 int listasEnum[4] = {0, 0, 0, 0};
 char listasItem[4] = {' ', ' ', ' ', ' '};
@@ -17,6 +18,7 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
+void createToDoIntense();
 void parseLink(char* string);
 void parseImage(char* string);
 void processCodeBlock();
@@ -47,6 +49,15 @@ void processCodeBlock();
 			  }
 			  yy_push_state(title); }
 
+\$\$			{ yy_push_state(notas); }
+
+<notas>\[		{ printf("\\hlfix{"); }
+<notas>\]\(		{ printf("}{"); }
+<notas>\)		{ printf("}~"); 
+				  yy_pop_state(); }
+
+!{1,3}[^!]+!{1,3}	{ createToDoIntense(); }
+
 ^[0-9]+\.					{ beginEnumerate(0); 
 						  	  processItem(0); 
 						  	  BEGIN lista; }
@@ -54,6 +65,7 @@ void processCodeBlock();
 ^[+\-*]\ 					{ beginItemize(0, yytext[0]); 
 						  	  processItem(0); 
 						  	  BEGIN lista; }
+
 
 <lista>^[\n]				{ closeEnumerate(3);
 						  	  closeEnumerate(2);
@@ -165,6 +177,29 @@ void parseLink(char* string){
 	printf("\\href{%s}{\\textit{%s}}\n", url, texto);
 }
 
+void createToDoHighlight() {
+
+}
+
+void createToDoIntense() {
+	
+	int i;
+	for(i = 0; yytext[i] == '!' && i < yyleng; i++);
+	if (i != yyleng) {
+		yytext[yyleng - i] = '\0';
+		switch(i) {
+			case 1 :
+				printf("\\todo[color=green!40]{%s}", yytext + i);
+				break;
+			case 2 :
+				printf("\\todo[color=yellow!50]{%s}", yytext + i);
+				break;
+			default :
+				printf("\\todo[color=red!50]{%s}", yytext + i);
+		}
+	}
+}
+
 // LISTAS NÃO ORDENADAS
 void beginItemize(int l, char c) {
 	int i = 0;
@@ -222,6 +257,9 @@ void beginDocument(){
 	printf("\\usepackage{blindtext}\n");
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
+	printf("\\usepackage{soul}\n");
+	printf("\\usepackage[colorlinks]{hyperref}\n");
+	printf("\\usepackage[colorinlistoftodos]{todonotes}\n");
 	printf("\\usepackage{caption}");
 	printf("\\usepackage{graphicx}");
 	printf("\\usepackage{hyperref}\n");
@@ -229,7 +267,8 @@ void beginDocument(){
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
-	printf("\\setlist[legal]{label*=\\arabic*.}\n\n");
+	printf("\\setlist[legal]{label*=\\arabic*.}\n");
+	printf("\\newcommand{\\hlfix}[2]{\\texthl{#1}\\todo{#2}}\n\n");
 	printf("\\begin{document}\n\n");
 }
 

@@ -10,6 +10,7 @@
 
 # Extras
 - Flex docs: ftp://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/html_mono/flex.html
+- ToDo's docs: ftp://ftp.di.uminho.pt/pub/ctan/macros/latex/contrib/todonotes/todonotes.pdf
 
 # Testes
 1. asdjahs
