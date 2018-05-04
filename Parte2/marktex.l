@@ -1,15 +1,12 @@
 %option stack
-%x lista italic bold under sout title color
+%x lista italic bold under sout title color notas
+
 %{
 
 #include <stdlib.h>
 #include <string.h>
 
 FILE* out;
-char buffer[1000];
-
-char* replace(char* string, char* token);
-char *substring(char *string, int position, int length);
 
 int listasEnum[4] = {0, 0, 0, 0};
 char listasItem[4] = {' ', ' ', ' ', ' '};
@@ -20,11 +17,20 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
+void createToDoIntense();
+void parseLink(char* string);
+void parseImage(char* string);
 void processCodeBlock();
 
 %}
 
 %%
+
+!\[[^\]]+\]\([^)]+\)		{ parseImage(yytext); }
+
+\[[^\]]+\]\([^)]+\)		{ parseLink(yytext); }
+
+^[\-*_]{3,}	{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
 
 ^.+->		{ yytext[yyleng - 2] = '\0';
 			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
@@ -42,6 +48,15 @@ void processCodeBlock();
 			  }
 			  yy_push_state(title); }
 
+\$\$			{ yy_push_state(notas); }
+
+<notas>\[		{ printf("\\hlfix{"); }
+<notas>\]\(		{ printf("}{"); }
+<notas>\)		{ printf("}~"); 
+				  yy_pop_state(); }
+
+!{1,3}[^!]+!{1,3}	{ createToDoIntense(); }
+
 ^[0-9]+\.					{ beginEnumerate(0); 
 						  	  processItem(0); 
 						  	  BEGIN lista; }
@@ -49,6 +64,7 @@ void processCodeBlock();
 ^[+\-*]\ 					{ beginItemize(0, yytext[0]); 
 						  	  processItem(0); 
 						  	  BEGIN lista; }
+
 
 <lista>^[\n]				{ closeEnumerate(3);
 						  	  closeEnumerate(2);
@@ -131,6 +147,65 @@ void processCodeBlock();
 ^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{processCodeBlock();}
 %%
 
+void parseImage(char* string){
+	char legenda[500];
+	char imagem[500];
+	int i = 0;
+	//printf("TESTE - %s\n", string);
+
+	for (i = 2; string[i] != ']'; i++)
+		legenda[i - 2] = string[i];
+
+	i += 2;
+	for (int j = 0; string[i] != ')'; i++, j++)
+		imagem[j] = string[i];
+
+	printf("\\begin{figure}[h]\n");
+	printf("\\centering\n");
+	printf("\\includegraphics[width=\\linewidth, height=\\textheight,keepaspectratio]{%s}\n",imagem );
+	printf("\\caption{%s}\n", legenda);
+	printf("\\end{figure}\n");
+
+}
+
+void parseLink(char* string){
+	char texto[500];
+	char url[500];
+	int i = 0;
+
+	for (i = 1; string[i] != ']'; i++ )
+		texto[i - 1] = string[i];
+
+	i += 2;
+	for (int j = 0; string[i] != ')'; i++, j++)
+		url[j] = string[i];
+
+	printf("\\href{%s}{\\textit{%s}}\n", url, texto);
+}
+
+void createToDoHighlight() {
+
+}
+
+void createToDoIntense() {
+	
+	int i;
+	for(i = 0; yytext[i] == '!' && i < yyleng; i++);
+	if (i != yyleng) {
+		yytext[yyleng - i] = '\0';
+		switch(i) {
+			case 1 :
+				printf("\\todo[color=green!40]{%s}", yytext + i);
+				break;
+			case 2 :
+				printf("\\todo[color=yellow!50]{%s}", yytext + i);
+				break;
+			default :
+				printf("\\todo[color=red!50]{%s}", yytext + i);
+		}
+	}
+}
+
 // LISTAS NÃO ORDENADAS
 void beginItemize(int l, char c) {
 	int i = 0;
@@ -188,12 +263,19 @@ void beginDocument(){
 	printf("\\usepackage{blindtext}\n");
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
+	printf("\\usepackage{soul}\n");
+	printf("\\usepackage[colorlinks]{hyperref}\n");
+	printf("\\usepackage[colorinlistoftodos]{todonotes}\n");
+	printf("\\usepackage{caption}");
+	printf("\\usepackage{graphicx}");
+	printf("\\usepackage{hyperref}\n");
 	printf("\\usepackage{listings}\n");
 	printf("\\usepackage{xcolor}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
-	printf("\\setlist[legal]{label*=\\arabic*.}\n\n");
+	printf("\\setlist[legal]{label*=\\arabic*.}\n");
+	printf("\\newcommand{\\hlfix}[2]{\\texthl{#1}\\todo{#2}}\n\n");
 	printf("\\begin{document}\n\n");
 }
 
@@ -216,6 +298,7 @@ int main(int argc, char* argv[]){
 			beginDocument();
 			yylex();
 			endDocument();
+      fclose(out);
 		}
 	}
 }
