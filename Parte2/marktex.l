@@ -1,6 +1,5 @@
 %option stack
-%x lista italic bold under sout title code
-%s codeblock
+%x lista italic bold under sout title
 %{
 
 #include <stdlib.h>
@@ -21,6 +20,7 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
+void processCodeBlock();
 
 %}
 
@@ -104,11 +104,6 @@ void closeItemize(int l);
 <under>_			{printf("}");
 				 yy_pop_state();}
 
-<code>'				{printf("}");
-		  		 yy_pop_state();}
-
-<codeblock>^'''\n		{printf("\\end{lstlisting}\n");}
-
 <*>\\[\/*~_']	{ printf("%s", yytext + 1); }
 
 <*>\/				{printf("\\textit{");
@@ -123,14 +118,10 @@ void closeItemize(int l);
 <*>_				{printf("\\underline{");
 				 yy_push_state(under);}
 
-<*>'				{printf("\\texttt{");
-				 yy_push_state(code);}
+<*>`.+`				{yytext[yyleng - 1] = '\0';
+				 printf("\\texttt{%s}", yytext + 1);}
 
-^'''([a-z]+)?\n			{if(yyleng > 4){
-					yytext[yyleng - 1] = '\0';
-					printf("\\begin{lstlisting}[language=%s]\n", yytext + 3);}
-				 else printf("\\begin{lstlisting}\n");
-				 BEGIN(codeblock);}
+^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{processCodeBlock();}
 %%
 
 // LISTAS NÃO ORDENADAS
@@ -167,6 +158,19 @@ void closeEnumerate(int l) {
 		printf("\\end{legal}\n"); 
 		listasEnum[l] = 0;
 	}
+}
+
+void processCodeBlock(){
+	printf("\\begin{lstlisting}");
+	int i = 0;
+	if(yytext[3] != '\n'){
+		for(i = 3; yytext[i] != '\n'; i++);
+		yytext[i] = '\0';
+		printf("[language=%s]\n", yytext + 3);
+		i -= 2;
+		}
+	yytext[yyleng - 5] = '\0';
+	printf("%s\n\\end{lstlisting}\n", yytext + 3 + i);
 }
 
 void beginDocument(){
