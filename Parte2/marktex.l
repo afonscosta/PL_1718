@@ -8,9 +8,6 @@
 FILE* out;
 char buffer[1000];
 
-char* replace(char* string, char* token);
-char *substring(char *string, int position, int length);
-
 int listasEnum[4] = {0, 0, 0, 0};
 char listasItem[4] = {' ', ' ', ' ', ' '};
 
@@ -20,11 +17,19 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
+void parseLink(char* string);
+void parseImage(char* string);
 void processCodeBlock();
 
 %}
 
 %%
+
+!\[[^\]]+\]\([^)]+\)		{ parseImage(yytext); }
+
+\[[^\]]+\]\([^)]+\)		{ parseLink(yytext); }
+
+^[\-*_]{3,}	{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
 
 ^.+->		{ yytext[yyleng - 2] = '\0';
 			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
@@ -124,6 +129,42 @@ void processCodeBlock();
 ^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{processCodeBlock();}
 %%
 
+void parseImage(char* string){
+	char legenda[500];
+	char imagem[500];
+	int i = 0;
+	//printf("TESTE - %s\n", string);
+
+	for (i = 2; string[i] != ']'; i++)
+		legenda[i - 2] = string[i];
+
+	i += 2;
+	for (int j = 0; string[i] != ')'; i++, j++)
+		imagem[j] = string[i];
+
+	printf("\\begin{figure}[h]\n");
+	printf("\\centering\n");
+	printf("\\includegraphics[width=\\linewidth, height=\\textheight,keepaspectratio]{%s}\n",imagem );
+	printf("\\caption{%s}\n", legenda);
+	printf("\\end{figure}\n");
+
+}
+
+void parseLink(char* string){
+	char texto[500];
+	char url[500];
+	int i = 0;
+
+	for (i = 1; string[i] != ']'; i++ )
+		texto[i - 1] = string[i];
+
+	i += 2;
+	for (int j = 0; string[i] != ')'; i++, j++)
+		url[j] = string[i];
+
+	printf("\\href{%s}{\\textit{%s}}\n", url, texto);
+}
+
 // LISTAS NÃO ORDENADAS
 void beginItemize(int l, char c) {
 	int i = 0;
@@ -181,6 +222,9 @@ void beginDocument(){
 	printf("\\usepackage{blindtext}\n");
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
+	printf("\\usepackage{caption}");
+	printf("\\usepackage{graphicx}");
+	printf("\\usepackage{hyperref}\n");
 	printf("\\usepackage{listings}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
