@@ -298,7 +298,7 @@ int main(int argc, char* argv[]){
 			beginDocument();
 			yylex();
 			endDocument();
-      			fclose(out);
+			fclose(out);
 		}
 	}
 }
