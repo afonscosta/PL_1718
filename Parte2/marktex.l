@@ -141,6 +141,9 @@ void processCodeBlock();
 				 printf("\\textcolor{%s}{", yytext + 1);
 				 yy_push_state(color);}
 
+<*>;[a-zA-Z][a-zA-Z!0-9]+;	{yytext[yyleng - 1] = '\0';
+				 printf("\\color{%s}", yytext + 1);}
+
 <*>`.+`				{yytext[yyleng - 1] = '\0';
 				 printf("\\texttt{%s}", yytext + 1);}
 
