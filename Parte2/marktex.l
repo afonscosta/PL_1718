@@ -1,6 +1,6 @@
 %option stack
-%x lista italic bold under sout title
-
+%x lista italic bold under sout title code
+%s codeblock
 %{
 
 #include <stdlib.h>
@@ -25,6 +25,7 @@ void closeItemize(int l);
 %}
 
 %%
+
 ^.+->		{ yytext[yyleng - 2] = '\0';
 			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
 
@@ -103,7 +104,12 @@ void closeItemize(int l);
 <under>_			{printf("}");
 				 yy_pop_state();}
 
-<*>\\[\/*~_]	{ printf("%s", yytext + 1); }
+<code>'				{printf("}");
+		  		 yy_pop_state();}
+
+<codeblock>^'''\n		{printf("\\end{lstlisting}\n");}
+
+<*>\\[\/*~_']	{ printf("%s", yytext + 1); }
 
 <*>\/				{printf("\\textit{");
 				 yy_push_state(italic);}
@@ -116,6 +122,15 @@ void closeItemize(int l);
 
 <*>_				{printf("\\underline{");
 				 yy_push_state(under);}
+
+<*>'				{printf("\\texttt{");
+				 yy_push_state(code);}
+
+^'''([a-z]+)?\n			{if(yyleng > 4){
+					yytext[yyleng - 1] = '\0';
+					printf("\\begin{lstlisting}[language=%s]\n", yytext + 3);}
+				 else printf("\\begin{lstlisting}\n");
+				 BEGIN(codeblock);}
 %%
 
 // LISTAS NÃO ORDENADAS
@@ -162,6 +177,7 @@ void beginDocument(){
 	printf("\\usepackage{blindtext}\n");
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
+	printf("\\usepackage{listings}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
