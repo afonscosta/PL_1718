@@ -1,5 +1,5 @@
 marktex: lex.yy.c
-	gcc -o marktex lex.yy.c -lfl
+	gcc -o marktex lex.yy.c -ll
 
 lex.yy.c: marktex.l
 	flex marktex.l

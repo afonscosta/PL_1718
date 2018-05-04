@@ -1,5 +1,5 @@
-
 %option stack
+
 %x lista italic bold under sout title notas
 
 %{
@@ -19,10 +19,20 @@ void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
 void createToDoIntense();
+void parseLink(char* string);
+void parseImage(char* string);
+void processCodeBlock();
 
 %}
 
 %%
+
+!\[[^\]]+\]\([^)]+\)		{ parseImage(yytext); }
+
+\[[^\]]+\]\([^)]+\)		{ parseLink(yytext); }
+
+^[\-*_]{3,}	{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
+
 ^.+->		{ yytext[yyleng - 2] = '\0';
 			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
 
@@ -96,39 +106,76 @@ void createToDoIntense();
 <lista>^\t\t\t[0-9]+\.		{ beginEnumerate(3); 
 							  processItem(3); }
 
+<title>\n			{printf("}\n");
+				 yy_pop_state();}
 
-<title>\n		{ printf("}\n");
-				  yy_pop_state(); }
+<italic>\/			{printf("}");
+				 yy_pop_state();}
 
-<italic>\/		{ printf("}");
-				  yy_pop_state(); }
+<bold>\*			{printf("}");
+				 yy_pop_state();}
 
-<bold>\*		{ printf("}");
-				  yy_pop_state(); }
+<sout>~				{printf("}");
+				 yy_pop_state();}
 
-<sout>~			{ printf("}");
-				  yy_pop_state(); }
+<under>_			{printf("}");
+				 yy_pop_state();}
 
-<under>_		{ printf("}");
-				  yy_pop_state(); }
+<*>\\[\/*~_']	{ printf("%s", yytext + 1); }
 
+<*>\/				{printf("\\textit{");
+				 yy_push_state(italic);}
 
-<*>\\[\/*~_]	{ printf("%s", yytext + 1); }
+<*>\*				{printf("\\textbf{");
+				 yy_push_state(bold);}
 
-<*>\/			{ printf("\\textit{");
-				  yy_push_state(italic); }
+<*>~				{printf("\\sout{");
+				 yy_push_state(sout);}
 
-<*>\*			{ printf("\\textbf{");
-				  yy_push_state(bold); }
+<*>_				{printf("\\underline{");
+				 yy_push_state(under);}
 
-<*>~			{ printf("\\sout{");
-				  yy_push_state(sout); }
+<*>`.+`				{yytext[yyleng - 1] = '\0';
+				 printf("\\texttt{%s}", yytext + 1);}
 
-<*>_			{ printf("\\underline{");
-				  yy_push_state(under); }
-
-
+^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{processCodeBlock();}
 %%
+
+void parseImage(char* string){
+	char legenda[500];
+	char imagem[500];
+	int i = 0;
+	//printf("TESTE - %s\n", string);
+
+	for (i = 2; string[i] != ']'; i++)
+		legenda[i - 2] = string[i];
+
+	i += 2;
+	for (int j = 0; string[i] != ')'; i++, j++)
+		imagem[j] = string[i];
+
+	printf("\\begin{figure}[h]\n");
+	printf("\\centering\n");
+	printf("\\includegraphics[width=\\linewidth, height=\\textheight,keepaspectratio]{%s}\n",imagem );
+	printf("\\caption{%s}\n", legenda);
+	printf("\\end{figure}\n");
+
+}
+
+void parseLink(char* string){
+	char texto[500];
+	char url[500];
+	int i = 0;
+
+	for (i = 1; string[i] != ']'; i++ )
+		texto[i - 1] = string[i];
+
+	i += 2;
+	for (int j = 0; string[i] != ')'; i++, j++)
+		url[j] = string[i];
+
+	printf("\\href{%s}{\\textit{%s}}\n", url, texto);
+}
 
 void createToDoHighlight() {
 
@@ -189,6 +236,19 @@ void closeEnumerate(int l) {
 	}
 }
 
+void processCodeBlock(){
+	printf("\\begin{lstlisting}");
+	int i = 0;
+	if(yytext[3] != '\n'){
+		for(i = 3; yytext[i] != '\n'; i++);
+		yytext[i] = '\0';
+		printf("[language=%s]\n", yytext + 3);
+		i -= 2;
+		}
+	yytext[yyleng - 5] = '\0';
+	printf("%s\n\\end{lstlisting}\n", yytext + 3 + i);
+}
+
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
 	printf("\\usepackage[portuguese]{babel}\n\n");
@@ -200,6 +260,10 @@ void beginDocument(){
 	printf("\\usepackage{soul}\n");
 	printf("\\usepackage[colorlinks]{hyperref}\n");
 	printf("\\usepackage[colorinlistoftodos]{todonotes}\n");
+	printf("\\usepackage{caption}");
+	printf("\\usepackage{graphicx}");
+	printf("\\usepackage{hyperref}\n");
+	printf("\\usepackage{listings}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
@@ -227,6 +291,7 @@ int main(int argc, char* argv[]){
 			beginDocument();
 			yylex();
 			endDocument();
+			fclose(out);
 		}
 	}
 }
