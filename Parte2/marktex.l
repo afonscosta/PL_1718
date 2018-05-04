@@ -46,7 +46,7 @@ void processCodeBlock();
 				  default :
 					  printf("\\subsubsection{"); 
 			  }
-			  yy_push_state(title); }
+			  BEGIN title; }
 
 \$\$			{ yy_push_state(notas); }
 
@@ -106,7 +106,7 @@ void processCodeBlock();
 							  processItem(3); }
 
 <title>\n			{printf("}\n");
-				 yy_pop_state();}
+				 BEGIN 0;}
 
 <italic>\/			{printf("}");
 				 yy_pop_state();}
