@@ -1,7 +1,5 @@
-
 %option stack
 %x lista italic bold under sout title
-
 %{
 
 #include <stdlib.h>
@@ -22,10 +20,12 @@ void closeEnumerate(int l);
 void beginItemize(int l, char c);
 void processItemizeItem();
 void closeItemize(int l);
+void processCodeBlock();
 
 %}
 
 %%
+
 ^.+->		{ yytext[yyleng - 2] = '\0';
 			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
 
@@ -89,38 +89,39 @@ void closeItemize(int l);
 <lista>^\t\t\t[0-9]+\.		{ beginEnumerate(3); 
 							  processItem(3); }
 
+<title>\n			{printf("}\n");
+				 yy_pop_state();}
 
-<title>\n		{ printf("}\n");
-				  yy_pop_state(); }
+<italic>\/			{printf("}");
+				 yy_pop_state();}
 
-<italic>\/		{ printf("}");
-				  yy_pop_state(); }
+<bold>\*			{printf("}");
+				 yy_pop_state();}
 
-<bold>\*		{ printf("}");
-				  yy_pop_state(); }
+<sout>~				{printf("}");
+				 yy_pop_state();}
 
-<sout>~			{ printf("}");
-				  yy_pop_state(); }
+<under>_			{printf("}");
+				 yy_pop_state();}
 
-<under>_		{ printf("}");
-				  yy_pop_state(); }
+<*>\\[\/*~_']	{ printf("%s", yytext + 1); }
 
+<*>\/				{printf("\\textit{");
+				 yy_push_state(italic);}
 
-<*>\\[\/*~_]	{ printf("%s", yytext + 1); }
+<*>\*				{printf("\\textbf{");
+				 yy_push_state(bold);}
 
-<*>\/			{ printf("\\textit{");
-				  yy_push_state(italic); }
+<*>~				{printf("\\sout{");
+				 yy_push_state(sout);}
 
-<*>\*			{ printf("\\textbf{");
-				  yy_push_state(bold); }
+<*>_				{printf("\\underline{");
+				 yy_push_state(under);}
 
-<*>~			{ printf("\\sout{");
-				  yy_push_state(sout); }
+<*>`.+`				{yytext[yyleng - 1] = '\0';
+				 printf("\\texttt{%s}", yytext + 1);}
 
-<*>_			{ printf("\\underline{");
-				  yy_push_state(under); }
-
-
+^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{processCodeBlock();}
 %%
 
 // LISTAS NÃO ORDENADAS
@@ -159,6 +160,19 @@ void closeEnumerate(int l) {
 	}
 }
 
+void processCodeBlock(){
+	printf("\\begin{lstlisting}");
+	int i = 0;
+	if(yytext[3] != '\n'){
+		for(i = 3; yytext[i] != '\n'; i++);
+		yytext[i] = '\0';
+		printf("[language=%s]\n", yytext + 3);
+		i -= 2;
+		}
+	yytext[yyleng - 5] = '\0';
+	printf("%s\n\\end{lstlisting}\n", yytext + 3 + i);
+}
+
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
 	printf("\\usepackage[portuguese]{babel}\n\n");
@@ -167,6 +181,7 @@ void beginDocument(){
 	printf("\\usepackage{blindtext}\n");
 	printf("\\usepackage{scrextend}\n");
 	printf("\\usepackage{enumitem}\n");
+	printf("\\usepackage{listings}\n");
 	printf("\\setkomafont{labelinglabel}{\\ttfamily}\n");
 	printf("\\setkomafont{labelingseparator}{\\normalfont}\n");
 	printf("\\newlist{legal}{enumerate}{10}\n");
@@ -193,6 +208,7 @@ int main(int argc, char* argv[]){
 			beginDocument();
 			yylex();
 			endDocument();
+			fclose(out);
 		}
 	}
 }
