@@ -26,135 +26,140 @@ void processCodeBlock();
 
 %%
 
-!\[[^\]]+\]\([^)]+\)		{ parseImage(yytext); }
+!\[[^\]]+\]\([^)]+\)	{ parseImage(yytext); }
 
 \[[^\]]+\]\([^)]+\)		{ parseLink(yytext); }
 
-^[\-*_]{3,}	{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
+^[\-*_]{3,}				{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
 
-^.+->		{ yytext[yyleng - 2] = '\0';
-			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
-
-
-^#{1,3}\ 	{ switch(yyleng) {
-			      case 2 :
-				      printf("\\section{");
-					  break;
-				  case 3 :
-				      printf("\\subsection{");
-					  break;
-				  default :
-					  printf("\\subsubsection{"); 
-			  }
-			  BEGIN title; }
-
-\$\$			{ yy_push_state(notas); }
-
-<notas>\[		{ printf("\\hlfix{"); }
-<notas>\]\(		{ printf("}{"); }
-<notas>\)		{ printf("}~"); 
-				  yy_pop_state(); }
-
-!{1,3}[^!]+!{1,3}	{ createToDoIntense(); }
-
-^[0-9]+\.					{ beginEnumerate(0); 
-						  	  processItem(0); 
-						  	  BEGIN lista; }
-
-^[+\-*]\ 					{ beginItemize(0, yytext[0]); 
-						  	  processItem(0); 
-						  	  BEGIN lista; }
+^.+->					{ yytext[yyleng - 2] = '\0';
+			  			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
 
 
-<lista>^[\n]				{ closeEnumerate(3);
-						  	  closeEnumerate(2);
-						  	  closeEnumerate(1);
-						  	  closeEnumerate(0);
-							  closeItemize(3);
-                              closeItemize(2);
-                              closeItemize(1);
-                              closeItemize(0);
-						  	  BEGIN 0; }
+^#{1,3}\ 				{ switch(yyleng) {
+			      		      case 2 :
+				      		      printf("\\section{");
+					  			  break;
+				  			  case 3 :
+				      			  printf("\\subsection{");
+					  			  break;
+				  			  default :
+					  			  printf("\\subsubsection{"); 
+			  			  }
+			  			  BEGIN title; }
 
-<lista>^[+\-*]\ 			{ closeItemize(1);
-							  processItem(0); }
 
-<lista>^\t[+\-*]\ 			{ closeItemize(2);
-							  beginItemize(1, yytext[0]);
-							  processItem(1); }
+\$\$					{ yy_push_state(notas); }
 
-<lista>^\t\t[+\-*]\ 		{ closeItemize(3);
-						  	  beginItemize(2, yytext[0]);
-						      processItem(2); }
+<notas>\[				{ printf("\\hlfix{"); }
+<notas>\]\(				{ printf("}{"); }
+<notas>\)				{ printf("}~"); 
+				  		  yy_pop_state(); }
 
-<lista>^\t\t\t[+\-*]\ 		{ beginItemize(3, yytext[0]); 
+!{1,3}[^!]+!{1,3}		{ createToDoIntense(); }
+
+
+^[0-9]+\.				{ beginEnumerate(0); 
+						  processItem(0); 
+						  BEGIN lista; }
+
+^[+\-*]\ 				{ beginItemize(0, yytext[0]); 
+						  processItem(0); 
+						  BEGIN lista; }
+
+
+<lista>^[\n]			{ closeEnumerate(3);
+						  closeEnumerate(2);
+						  closeEnumerate(1);
+						  closeEnumerate(0);
+						  closeItemize(3);
+                          closeItemize(2);
+                          closeItemize(1);
+                          closeItemize(0);
+						  BEGIN 0; }
+
+<lista>^[+\-*]\ 		{ closeItemize(1);
+						  processItem(0); }
+
+<lista>^\t[+\-*]\ 		{ closeItemize(2);
+						  beginItemize(1, yytext[0]);
+						  processItem(1); }
+
+<lista>^\t\t[+\-*]\ 	{ closeItemize(3);
+						  beginItemize(2, yytext[0]);
+						  processItem(2); }
+
+<lista>^\t\t\t[+\-*]\ 	{ beginItemize(3, yytext[0]); 
+						  processItem(3); }
+
+<lista>^[0-9]+\.		{ closeEnumerate(1);
+						  beginEnumerate(0);
+						  processItem(0); }
+
+<lista>^\t[0-9]+\.		{ closeEnumerate(2);
+						  beginEnumerate(1);
+						  processItem(1); }
+
+<lista>^\t\t[0-9]+\.	{ closeEnumerate(3);
+						  beginEnumerate(2);
+						  processItem(2); }
+
+<lista>^\t\t\t[0-9]+\.	{ beginEnumerate(3); 
 							  processItem(3); }
 
-<lista>^[0-9]+\.			{ closeEnumerate(1);
-						  	  beginEnumerate(0);
-						  	  processItem(0); }
 
-<lista>^\t[0-9]+\.			{ closeEnumerate(2);
-							  beginEnumerate(1);
-							  processItem(1); }
+<title>\n				{ printf("}\n");
+				 		  BEGIN 0; }
 
-<lista>^\t\t[0-9]+\.		{ closeEnumerate(3);
-						  	  beginEnumerate(2);
-						      processItem(2); }
+<italic>\/				{ printf("}");
+				 		  yy_pop_state(); }
 
-<lista>^\t\t\t[0-9]+\.		{ beginEnumerate(3); 
-							  processItem(3); }
+<bold>\*				{ printf("}");
+				 		  yy_pop_state();}
 
-<title>\n			{printf("}\n");
-				 BEGIN 0;}
+<sout>~					{ printf("}");
+				 		  yy_pop_state(); }
 
-<italic>\/			{printf("}");
-				 yy_pop_state();}
+<under>_				{ printf("}");
+				 		  yy_pop_state(); }
 
-<bold>\*			{printf("}");
-				 yy_pop_state();}
+<color>;				{ printf("}");
+				 		  yy_pop_state(); }
 
-<sout>~				{printf("}");
-				 yy_pop_state();}
+<*>\\[\/*~_`]			{ printf("%s", yytext + 1); }
 
-<under>_			{printf("}");
-				 yy_pop_state();}
+<*>\/					{ printf("\\textit{");
+				 		  yy_push_state(italic); }
 
-<color>;			{printf("}");
-				 yy_pop_state();}
+<*>\*					{ printf("\\textbf{");
+				 		  yy_push_state(bold); }
 
-<*>\\[\/*~_`]	{ printf("%s", yytext + 1); }
+<*>~					{ printf("\\sout{");
+				 		  yy_push_state(sout); }
 
-<*>\/				{printf("\\textit{");
-				 yy_push_state(italic);}
+<*>_					{ printf("\\underline{");
+				 		  yy_push_state(under); }
 
-<*>\*				{printf("\\textbf{");
-				 yy_push_state(bold);}
 
-<*>~				{printf("\\sout{");
-				 yy_push_state(sout);}
+<*>;[a-zA-Z][a-zA-Z!0-9]+\ 	{ yytext[yyleng - 1] = '\0';
+				 			  printf("\\textcolor{%s}{", yytext + 1);
+				 			  yy_push_state(color); }
 
-<*>_				{printf("\\underline{");
-				 yy_push_state(under);}
+<*>;[a-zA-Z][a-zA-Z!0-9]+;	{ yytext[yyleng - 1] = '\0';
+				 			  printf("\\color{%s}", yytext + 1); }
 
-<*>;[a-zA-Z][a-zA-Z!0-9]+\ 	{yytext[yyleng - 1] = '\0';
-				 printf("\\textcolor{%s}{", yytext + 1);
-				 yy_push_state(color);}
 
-<*>;[a-zA-Z][a-zA-Z!0-9]+;	{yytext[yyleng - 1] = '\0';
-				 printf("\\color{%s}", yytext + 1);}
+<*>`.+`								{ yytext[yyleng - 1] = '\0';
+				 			  		  printf("\\texttt{%s}", yytext + 1); }
 
-<*>`.+`				{yytext[yyleng - 1] = '\0';
-				 printf("\\texttt{%s}", yytext + 1);}
-
-^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{processCodeBlock();}
+^```([a-zA-Z0-9]+)?\n[^`]+\n```\n	{ processCodeBlock(); }
 %%
 
+// IMAGENS --------
 void parseImage(char* string){
 	char legenda[500];
 	char imagem[500];
 	int i = 0;
-	//printf("TESTE - %s\n", string);
 
 	for (i = 2; string[i] != ']'; i++)
 		legenda[i - 2] = string[i];
@@ -170,7 +175,10 @@ void parseImage(char* string){
 	printf("\\end{figure}\n");
 
 }
+//-----------------
 
+
+// LINKS ----------
 void parseLink(char* string){
 	char texto[500];
 	char url[500];
@@ -185,11 +193,10 @@ void parseLink(char* string){
 
 	printf("\\href{%s}{\\textit{%s}}\n", url, texto);
 }
+//-----------------
 
-void createToDoHighlight() {
 
-}
-
+// NOTAS ----------
 void createToDoIntense() {
 	
 	int i;
@@ -208,6 +215,8 @@ void createToDoIntense() {
 		}
 	}
 }
+//-----------------
+
 
 // LISTAS NÃO ORDENADAS
 void beginItemize(int l, char c) {
@@ -228,6 +237,8 @@ void closeItemize(int l) {
 		listasItem[l] = ' ';
 	}
 }
+//-----------------
+
 
 // LISTAS ORDENADAS
 void beginEnumerate(int l) {
@@ -244,7 +255,10 @@ void closeEnumerate(int l) {
 		listasEnum[l] = 0;
 	}
 }
+//-----------------
 
+
+// CODE -----------
 void processCodeBlock(){
 	printf("\\begin{lstlisting}");
 	int i = 3;
@@ -256,7 +270,10 @@ void processCodeBlock(){
 	yytext[yyleng - 5] = '\0';
 	printf("%s\n\\end{lstlisting}\n", yytext + 1 + i);
 }
+//-----------------
 
+
+// LATEX ----------
 void beginDocument(){
 	printf("\\documentclass[a4paper]{article}\n\n");
 	printf("\\usepackage[portuguese]{babel}\n\n");
@@ -284,6 +301,7 @@ void beginDocument(){
 void endDocument(){
 	printf("\\end{document}\n");
 }
+//-----------------
 
 
 int main(int argc, char* argv[]){
