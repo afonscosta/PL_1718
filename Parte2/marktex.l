@@ -9,13 +9,11 @@
 FILE* out;
 
 int listasEnum[4] = {0, 0, 0, 0};
-char listasItem[4] = {' ', ' ', ' ', ' '};
+int listasItem[4] = {0, 0, 0, 0};
 
 void beginEnumerate(int l);
-void processItem();
 void closeEnumerate(int l);
-void beginItemize(int l, char c);
-void processItemizeItem();
+void beginItemize(int l);
 void closeItemize(int l);
 void createToDoIntense();
 void parseLink(char* string);
@@ -60,11 +58,11 @@ void processCodeBlock();
 
 
 ^[0-9]+\.				{ beginEnumerate(0); 
-						  processItem(0); 
+						  printf("\\item "); 
 						  BEGIN lista; }
 
-^[+\-*]\ 				{ beginItemize(0, yytext[0]); 
-						  processItem(0); 
+^[+\-*]\ 				{ beginItemize(0); 
+						  printf("\\item "); 
 						  BEGIN lista; }
 
 
@@ -79,33 +77,39 @@ void processCodeBlock();
 						  BEGIN 0; }
 
 <lista>^[+\-*]\ 		{ closeItemize(1);
-						  processItem(0); }
+						  closeItemize(2);
+						  closeItemize(3);
+						  printf("\\item "); }
 
 <lista>^\t[+\-*]\ 		{ closeItemize(2);
-						  beginItemize(1, yytext[0]);
-						  processItem(1); }
+						  closeItemize(3);
+						  beginItemize(1);
+						  printf("\\item "); }
 
 <lista>^\t\t[+\-*]\ 	{ closeItemize(3);
-						  beginItemize(2, yytext[0]);
-						  processItem(2); }
+						  beginItemize(2);
+						  printf("\\item "); }
 
-<lista>^\t\t\t[+\-*]\ 	{ beginItemize(3, yytext[0]); 
-						  processItem(3); }
+<lista>^\t\t\t[+\-*]\ 	{ beginItemize(3); 
+						  printf("\\item "); }
 
 <lista>^[0-9]+\.		{ closeEnumerate(1);
+						  closeEnumerate(2);
+						  closeEnumerate(3);
 						  beginEnumerate(0);
-						  processItem(0); }
+						  printf("\\item "); }
 
 <lista>^\t[0-9]+\.		{ closeEnumerate(2);
+						  closeEnumerate(3);
 						  beginEnumerate(1);
-						  processItem(1); }
+						  printf("\\item "); }
 
 <lista>^\t\t[0-9]+\.	{ closeEnumerate(3);
 						  beginEnumerate(2);
-						  processItem(2); }
+						  printf("\\item "); }
 
 <lista>^\t\t\t[0-9]+\.	{ beginEnumerate(3); 
-							  processItem(3); }
+						  printf("\\item "); }
 
 
 <title>\n				{ printf("}\n");
@@ -221,22 +225,17 @@ void createToDoIntense() {
 
 
 // LISTAS NÃO ORDENADAS
-void beginItemize(int l, char c) {
-	int i = 0;
-	if (listasItem[l] == ' ') {
-		listasItem[l] = c;
+void beginItemize(int l) {
+	if (listasItem[l] == 0) {
+		listasItem[l] = 1;
 		printf("\\begin{itemize}\n");
 	}
 }
 
-void processItem() {
-	printf("\\item "); 
-}
-
 void closeItemize(int l) {
-	if (listasItem[l] != ' ') {
+	if (listasItem[l] == 1) {
 		printf("\\end{itemize}\n"); 
-		listasItem[l] = ' ';
+		listasItem[l] = 0;
 	}
 }
 //-----------------
