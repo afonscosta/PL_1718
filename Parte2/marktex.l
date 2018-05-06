@@ -30,7 +30,7 @@ void processCodeBlock();
 
 ^[\-*_]{3,}				{ printf("\\vspace{10pt}\n\\hrule\n\\vspace{10pt}\n"); }
 
-<*>\\->					{printf("->");}
+<*>\\-\\>				{ printf("->"); }
 
 ^.+->					{ yytext[yyleng - 2] = '\0';
 			  			  printf("\\textbf{%s} $\\bullet$\\ ", yytext); }
