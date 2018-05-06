@@ -47,14 +47,14 @@ void processCodeBlock();
 			  			  BEGIN title; }
 
 
-\$\$					{ yy_push_state(notas); }
+<*>\$\$					{ yy_push_state(notas); }
 
 <notas>\[				{ printf("\\hlfix{"); }
 <notas>\]\(				{ printf("}{"); }
 <notas>\)				{ printf("}~"); 
 				  		  yy_pop_state(); }
 
-!{1,3}[^!]+!{1,3}		{ createToDoIntense(); }
+<*>!{1,3}[^!\n]+!{1,3}		{ createToDoIntense(); }
 
 
 ^[0-9]+\.				{ beginEnumerate(0); 
@@ -202,7 +202,6 @@ void parseLink(char* string){
 
 // NOTAS ----------
 void createToDoIntense() {
-	
 	int i;
 	for(i = 0; yytext[i] == '!' && i < yyleng; i++);
 	if (i != yyleng) {
