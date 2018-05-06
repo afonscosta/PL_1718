@@ -126,7 +126,9 @@ void processCodeBlock();
 <color>;				{ printf("}");
 				 		  yy_pop_state(); }
 
-<*>\\[\/*~_`]			{ printf("%s", yytext + 1); }
+<*>\\[\/*~_`;!\[\]()]			{ printf("%s", yytext + 1); }
+
+<*>\\(->)			{printf("->");}
 
 <*>\/					{ printf("\\textit{");
 				 		  yy_push_state(italic); }
