@@ -8,17 +8,15 @@
 
 FILE* out;
 
-int listasEnum[4] = {0, 0, 0, 0};
-int listasItem[4] = {0, 0, 0, 0};
+int listasOrdem[4] = {0, 0, 0, 0};
+int pos = 0;
 
-void beginEnumerate(int l);
-void closeEnumerate(int l);
-void beginItemize(int l);
-void closeItemize(int l);
 void createToDoIntense();
 void parseLink(char* string);
 void parseImage(char* string);
 void processCodeBlock();
+void closeListas();
+void beginLista(int tipo, char *s);
 
 %}
 
@@ -56,61 +54,59 @@ void processCodeBlock();
 <notas>\)				{ printf("}~"); 
 				  		  yy_pop_state(); }
 
-<*>!{1,3}[^!\n]+!{1,3}		{ createToDoIntense(); }
+<*>!{1,3}[^!\n]+!{1,3}	{ createToDoIntense(); }
 
 
-^[0-9]+\.				{ beginEnumerate(0); 
+^[0-9]+\.				{ beginLista(1, "legal");
 						  printf("\\item "); 
 						  BEGIN lista; }
 
-^[+\-*]\ 				{ beginItemize(0); 
+^[+\-*]\ 				{ beginLista(2, "itemize");
 						  printf("\\item "); 
 						  BEGIN lista; }
 
 
-<lista>^[\n]			{ closeEnumerate(3);
-						  closeEnumerate(2);
-						  closeEnumerate(1);
-						  closeEnumerate(0);
-						  closeItemize(3);
-                          closeItemize(2);
-                          closeItemize(1);
-                          closeItemize(0);
+<lista>^[\n]			{ closeListas(0);
 						  BEGIN 0; }
 
-<lista>^[+\-*]\ 		{ closeItemize(1);
-						  closeItemize(2);
-						  closeItemize(3);
+<lista>^[+\-*]\ 		{ closeListas(1);
+						  if (listasOrdem[pos-1] != 2) listasOrdem[pos++] = 2;
 						  printf("\\item "); }
 
-<lista>^\t[+\-*]\ 		{ closeItemize(2);
-						  closeItemize(3);
-						  beginItemize(1);
+<lista>^\t[+\-*]\ 		{ closeListas(2);
+						  beginLista(2, "itemize");
 						  printf("\\item "); }
 
-<lista>^\t\t[+\-*]\ 	{ closeItemize(3);
-						  beginItemize(2);
+<lista>^\t\t[+\-*]\ 	{ closeListas(3);
+						  beginLista(2, "itemize");
 						  printf("\\item "); }
 
-<lista>^\t\t\t[+\-*]\ 	{ beginItemize(3); 
+<lista>^\t\t\t[+\-*]\ 	{ beginLista(2, "itemize");
 						  printf("\\item "); }
 
-<lista>^[0-9]+\.		{ closeEnumerate(1);
-						  closeEnumerate(2);
-						  closeEnumerate(3);
-						  beginEnumerate(0);
+<lista>^[0-9]+\.		{ closeListas(1);
+						  if (listasOrdem[pos-1] != 1) listasOrdem[pos++] = 1;
 						  printf("\\item "); }
 
-<lista>^\t[0-9]+\.		{ closeEnumerate(2);
-						  closeEnumerate(3);
-						  beginEnumerate(1);
+<lista>^\t[0-9]+\.		{ closeListas(2);
+						  if (listasOrdem[pos-1] != 1) {
+						      listasOrdem[pos++] = 1;
+						      printf("\\begin{legal}\n");
+						  }
 						  printf("\\item "); }
 
-<lista>^\t\t[0-9]+\.	{ closeEnumerate(3);
-						  beginEnumerate(2);
+<lista>^\t\t[0-9]+\.	{ closeListas(3);
+						  if (listasOrdem[pos-1] != 1) {
+						      listasOrdem[pos++] = 1;
+						      printf("\\begin{legal}\n");
+						  }
 						  printf("\\item "); }
 
-<lista>^\t\t\t[0-9]+\.	{ beginEnumerate(3); 
+<lista>^\t\t\t[0-9]+\.	{ 
+						  if (listasOrdem[pos-1] != 1) {
+						      listasOrdem[pos++] = 1;
+						      printf("\\begin{legal}\n");
+						  }
 						  printf("\\item "); }
 
 
@@ -132,7 +128,7 @@ void processCodeBlock();
 <color>;				{ printf("}");
 				 		  yy_pop_state(); }
 
-<*>\\[\/*~_`;!\[\]()]			{ printf("%s", yytext + 1); }
+<*>\\[\/*~_`;!\[\]()]	{ printf("%s", yytext + 1); }
 
 <*>\/					{ printf("\\textit{");
 				 		  yy_push_state(italic); }
@@ -223,36 +219,28 @@ void createToDoIntense() {
 //-----------------
 
 
-// LISTAS NÃO ORDENADAS
-void beginItemize(int l) {
-	if (listasItem[l] == 0) {
-		listasItem[l] = 1;
-		printf("\\begin{itemize}\n");
+// LISTAS ---------
+// LNO -> tipo = 2, s = itemize
+// LO -> tipo = 1, s = legal
+void beginLista(int tipo, char *s) {
+	if (listasOrdem[pos-1] != tipo) {
+		listasOrdem[pos++] = tipo;
+	    printf("\\begin{%s}\n", s);
 	}
 }
 
-void closeItemize(int l) {
-	if (listasItem[l] == 1) {
-		printf("\\end{itemize}\n"); 
-		listasItem[l] = 0;
-	}
-}
-//-----------------
-
-
-// LISTAS ORDENADAS
-void beginEnumerate(int l) {
-	int i = 0;
-	if (listasEnum[l] == 0) {
-		listasEnum[l] = 1;
-		printf("\\begin{legal}\n");
-	}
-}
-
-void closeEnumerate(int l) {
-	if (listasEnum[l] == 1) {
-		printf("\\end{legal}\n"); 
-		listasEnum[l] = 0;
+void closeListas(int init) {
+	for (int i = pos-1; i >= init; i--) {
+		if (listasOrdem[i] == 1) {
+			printf("\\end{legal}\n");
+			listasOrdem[i] = 0;
+			pos = init;
+		}
+		else if (listasOrdem[i] == 2) {
+			printf("\\end{itemize}\n");
+			listasOrdem[i] = 0;
+			pos = init;
+		}
 	}
 }
 //-----------------
