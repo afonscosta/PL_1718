@@ -1,8 +1,9 @@
 %{
 #include <stdio.h>
 #include <math.h>
-#include <glib.h>
+//#include <glib.h>
 
+extern int asprintf(char **strp, const char *fmt, ...);
 extern int yylex();
 extern char *yytext;
 extern int yylineno;
@@ -10,7 +11,7 @@ void yyerror(char*);
 
 %}
 
-%token MT STR STRS
+%token MT STR ID ERRO
 %union {
 	char* mt;
 	char* id;
@@ -19,7 +20,7 @@ void yyerror(char*);
 
 %type <id> ID
 %type <mt> MT
-%type <str> STR
+%type <str> STR STRS
 
 %%
 
@@ -34,12 +35,12 @@ Es : Es E
    | E
    ;
 
-E : MT
-  | ID STRS
+E : MT				{ printf("%s\n", $1); }
+  | ID STRS			{ printf("%s %s\n", $1, $2); }
   ;
 
-STRS : STR
-    | STRS ',' STR
+STRS : STR			{ $$ = $1; }
+    | STRS ',' STR	{ sprintf($$, "%s, %s", $1, $3); }
     ;
 
 
