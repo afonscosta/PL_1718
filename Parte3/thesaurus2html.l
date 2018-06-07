@@ -1,23 +1,27 @@
+%option stack
+%x state_id COMENTARIO
+
 %{
 #include "y.tab.h"
+
 %}
 
 
 %%
-[ \n\t]			;
+[ \n\t]		;
 
+^%.*		;
 
+<*>#.*		;
 
+^[A-Z]*\ 	{ yylval.id = strdup(yytext); yy_push_state(state_id); return ID; }
 
+<state_id>\n\t	;
+<state_id>\n	{ yy_pop_state(); }
+<state_id>[^,\n#\t]* { yylval.str = strdup(yytext); return STR; }
+<state_id>, 		{ return *yytext; }
+<state_id>\t	;
 
+^[a-zA-Z]+	{ yylval.mt = strdup(yytext); return MT; }
 
-
-[()+\-*/\^?!={}]	{ return *yytext; /* return yytext[0]*/ }
-
-[0-9]+(\.[0-9]+)?	{ yylval.num = atof(yytext) ; return NUM; }
-
-[a-z]			{ yylval.id = *yytext; return ID; }
-
-repeat 			{ return REPEAT; }
-
-.			{ return ERRO; }
+<*>.			{ printf("ERRO"); }
