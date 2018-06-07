@@ -1,0 +1,177 @@
+
+File Structure
+       Thesaurus used with this module are standard ASCII documents. This file
+       can contain processing instructions, comments or term definitions. The
+       instructions area is used to define 
+            * new relations and 
+            * mathematical properties between them.
+
+          ______________
+         |              |
+         |    HEADER    | --> processing instructions,
+         |______________|     comment or empty lines.
+         |              |
+         |  Def Term 1  | --> Each term definition should be separated
+         |              |     from each other with an empty line.
+         |  Def Term 2  |
+         |              |
+         |     .....    |
+         |              |
+         |  Def Term n  |
+         |______________|
+
+       Comments can appear on any line. Meanwhile, the comment character (#)
+       should be the first character on the line (with no spaces before).
+       Comments line span to the end of the line (until the first carriage
+       return).
+
+       Processing instructions lines, like comments, should start with the
+       percent sign (%). We describe these instructions later on this document.
+
+       Terms definitions can't contain any empty line because they are used to
+       separate definitions from each other. On the first line of term definition
+       record should appear the defined term. Next lines defines relations with
+       other terms. The first characters should be an abbreviation of the
+       relation (on upper case) and spaces. Then, should appear a comma separated
+       list of terms.
+
+       There can be more than one line with the same relation. Thesaurus module
+       will concatenate the lists. If you want to continue a list on the next
+       line you can repeat the relation term of leave some spaces between the
+       start of the line and the terms list.
+
+       Here is an example:
+
+         Animal
+         NT cat, dog, cow,
+            fish, ant
+         NT camel
+         BT Life being
+
+         cat
+         BT Animal
+         SN domestic animal to be kicked when
+            anything bad occurs.
+
+       There can be defined a special term ("_top_"). It should be used when you
+       want a top tree for thesaurus navigation. So, we normally define the
+       "_top_" term with the more interesting terms to be navigated.
+
+
+RELATIONS
+
+   The user can use any relations he wants.
+
+   The ISO sugests the
+
+       NT - Narrower Term
+           Terms more specific than current term.  (inv BT)
+
+       BT - Broader Term
+           More generic terms than current term.  (inv NT)
+
+       RT - Related Term
+           Related term that can't be inserted on any other category. (int RT)
+
+       SN - Scope Note
+           Text. Note of context of the current term. Use for definitions or
+           comments about the scope you are using that term.
+
+       USE - (non preferencial) Synonym
+           tipically a remissive term  (inv UF)
+
+       UF - Quasi-Synonym
+           Terms that are no synonyms of current term but can be used, sometimes
+           with that meaning.  (inv USE)
+
+       TT - Top Term
+           The broadest term we can define about the current term.
+
+
+   Processing Instructions
+       Processing instructions, as said before, are written on a line starting
+       with the percent sign. Current commands are:
+
+       top When presenting a thesaurus, we need a term, to know where to start.
+           Normally, we want the thesaurus to have some kind of top level, where
+           to start navigating. This command specifies that term, the term that
+           should be used when no term is specified.
+
+           Example:
+
+             %top Contents
+
+             Contents
+             NT Biography ...
+             RT ...
+
+       encoding
+           This command defines the encoding used in the thesaurus file.
+
+           Example:
+
+            %enc utf8
+
+       inverse
+           This command defines the mathematic inverse of the relation. That is,
+           if you define "inverse A B" and you know that "foo" is related by "A"
+           with "bar", then, "bar" is related by "B" with "foo".
+
+           Example:
+
+             %inv BT NT
+             %inverse UF USE
+
+       description
+           This command defines a description for some relation class. These
+           descriptions are used when outputting thesaurus on HTML.
+
+           Example:
+
+             %desc SN Note of Scope
+             %description IOF Instance of
+
+           If you are constructing a multi-lingue thesaurus, you will want to
+           translate the relation class description. To do this, you should use
+           the "description" command with the language in from of it:
+
+             %desc[PT] SN Nota de Contexto
+             %description[PT] IOF Instancia de
+
+       externals
+           This defines classes that does not relate terms but, instead, relate a
+           term with some text (a scope note, an url, etc.). This can be used
+           like this:
+
+             %ext SN URL
+             %externals SN URL
+
+           Note that you can specify more than one relation type per line.
+
+       languages
+           This other command permits the construction of a multi-lingue
+           thesaurus. TO specify languages classifiers (like PT, EN, FR, and so
+           on) you can use one of these lines:
+
+             %lang PT EN FR
+             %languages PT EN FR
+
+           To describe (legend) the language names, you should use the
+           description command, so, you could append:
+
+             %description PT Portuguese
+             %description EN English
+             %description FR French
+
+       baselanguage
+           This one makes it possible to explicitly name the base language for
+           the thesaurus. This command should be used with the "description" one,
+           to describe the language name. Here is a simple example:
+
+             %baselang PT
+             %languages EN FR
+
+             %description PT Portuguese
+             %description EN English
+             %description FR French
+
