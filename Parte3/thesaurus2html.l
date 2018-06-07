@@ -1,23 +1,24 @@
+%option stack
+%x ID COMENTARIO
+
 %{
 #include "y.tab.h"
 %}
 
 
 %%
-[ \n\t]			;
+[ \n\t]		;
 
+<*>#		{ yy_push_state(COMENTARIO); }
 
+<COMENTARIO>.*$	{ yy_pop_state(); }
 
+^[A-Z]*\ 	{ yylval.id = *yytext; yy_push_state(ID); return ID; }
 
+<ID>[^,\n]* { yylval.str = *yytext; return STR; }
+<ID>, 		{ return *yytext; }
+<ID>\n		{ yy_pop_state(); }
 
-
-
-[()+\-*/\^?!={}]	{ return *yytext; /* return yytext[0]*/ }
-
-[0-9]+(\.[0-9]+)?	{ yylval.num = atof(yytext) ; return NUM; }
-
-[a-z]			{ yylval.id = *yytext; return ID; }
-
-repeat 			{ return REPEAT; }
+^[a-zA-Z]+	{ yylval.mt = *yytext; return MT; }
 
 .			{ return ERRO; }
