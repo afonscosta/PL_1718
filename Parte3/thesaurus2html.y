@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <math.h>
-#include <glib.h>
+//#include <glib.h>
 
 extern int yylex();
 extern char *yytext;
@@ -10,7 +10,7 @@ void yyerror(char*);
 
 %}
 
-%token MT STR STRS
+%token MT STR ID
 %union {
 	char* mt;
 	char* id;
@@ -19,7 +19,7 @@ void yyerror(char*);
 
 %type <id> ID
 %type <mt> MT
-%type <str> STR
+%type <str> STR STRS
 
 %%
 
@@ -36,7 +36,31 @@ Es : Es E
 
 E : MT
   | ID STRS
+  | 'NT' NTs
+  | BT
+  | SN
+  | USE
+  | UF
+  | TT
   ;
+
+NTs : STR
+    | STRS ',' STR
+
+BT : 'BT' STR
+   ;
+
+SN : 'SN' STR
+   ;
+
+USE : 'USE' STR
+    ;
+
+UF : 'UF' STR
+   ;
+
+TT : 'TT' STR
+   ;
 
 STRS : STR
     | STRS ',' STR
