@@ -1,9 +1,8 @@
 %option stack
-%x state_id state_tt state_bt state_nt state_rt state_sn state_uf state_use COMENTARIO
+%x state_id state_tt state_bt state_nt state_rt state_sn state_uf state_use 
 
 %{
 #include "y.tab.h"
-
 %}
 
 
