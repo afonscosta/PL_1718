@@ -7,8 +7,7 @@
 							# conceitos:
 animal						# termo na baselang
 PT animal					# LINGUA termo
-NT cat, dog, cow,			# NT = narrow term = termo específico
-	fish, ant
+NT cat, dog, cow, fish, ant			# NT = narrow term = termo específico
 NT camel
 BT Life being				# BT = broader term = termo genérico
 							# linha em branco : separador de conceitos
