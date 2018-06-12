@@ -4,6 +4,7 @@ LIBS = `pkg-config --libs glib-2.0`
 
 thesaurus2html : y.tab.o lex.yy.o
 	$(CC) $(CFLAGS) -o thesaurus2html y.tab.o lex.yy.o -lfl $(LIBS)
+	mkdir -p html_files
 
 y.tab.o : y.tab.c 
 	$(CC) $(CFLAGS) -c y.tab.c $(LIBS)
@@ -19,3 +20,4 @@ lex.yy.c : thesaurus2html.l
 
 clean :
 	rm lex.* y.* thesaurus2html
+	rm -r html_files
