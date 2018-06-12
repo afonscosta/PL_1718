@@ -22,7 +22,7 @@ GArray* strs;
 
 %}
 
-%token MT STR ID ERRO NT RT BT SN USE UF TT
+%token MT STR ID ERRO SN
 
 %union {
 	char* mt;
@@ -30,19 +30,19 @@ GArray* strs;
     char* str;
 }
 
-%type <id> ID NT RT BT SN USE UF TT
+%type <id> ID SN
 %type <mt> MT
-%type <str> STR STRs
+%type <str> STR STRs TXTs
 
 
 %%
 
 
-Cs : Cs C		
-   | C		
+Cs : Cs '\n' C 
+   | C
    ;
 
-C : Es 
+C : Es
   ;
 
 Es : Es E 
@@ -51,91 +51,38 @@ Es : Es E
 
 E : MT			{ conceito_atual = strdup($1); 
   				  g_hash_table_insert(conceitos, conceito_atual, g_hash_table_new(g_str_hash, g_str_equal)); }
+  | SN TXTs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
+  				  if (elems_atual != NULL) {
+					  if (!g_hash_table_contains(elems_atual, $1)) {
+						  g_hash_table_insert(elems_atual, $1, $2); 
+					  }
+					  else {
+					      char *strs = g_hash_table_lookup(elems_atual, $1);
+						  strs = realloc(strs, sizeof(char)*(strlen(strs)+strlen($2)+2));
+						  strcat(strs, ", ");
+						  strcat(strs, $2);
+					  }
+				  }
+				}
   | ID STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
-  				  if (elems_atual != NULL)
-					  g_hash_table_insert(elems_atual, $1, $2); }
-  | NT STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
   				  if (elems_atual != NULL) {
 					  if (!g_hash_table_contains(elems_atual, $1)) {
 						  g_hash_table_insert(elems_atual, $1, $2); 
 					  }
 					  else {
-					      char *nts = g_hash_table_lookup(elems_atual, $1);
-						  nts = realloc(nts, sizeof(char)*(strlen(nts)+strlen($2)+2));
-						  strcat(nts, ", ");
-						  strcat(nts, $2);
-					  }
-				  }
-				}
-  | BT STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
-  				  if (elems_atual != NULL) {
-					  if (!g_hash_table_contains(elems_atual, $1)) {
-						  g_hash_table_insert(elems_atual, $1, $2); 
-					  }
-					  else {
-					      char *nts = g_hash_table_lookup(elems_atual, $1);
-						  nts = realloc(nts, sizeof(char)*(strlen(nts)+strlen($2)+2));
-						  strcat(nts, ", ");
-						  strcat(nts, $2);
-					  }
-				  }
-				}
-  | SN STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
-  				  if (elems_atual != NULL) {
-					  if (!g_hash_table_contains(elems_atual, $1)) {
-						  g_hash_table_insert(elems_atual, $1, $2); 
-					  }
-					  else {
-					      char *nts = g_hash_table_lookup(elems_atual, $1);
-						  nts = realloc(nts, sizeof(char)*(strlen(nts)+strlen($2)+2));
-						  strcat(nts, ", ");
-						  strcat(nts, $2);
-					  }
-				  }
-				}
-  | USE STRs	{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
-  				  if (elems_atual != NULL) {
-					  if (!g_hash_table_contains(elems_atual, $1)) {
-						  g_hash_table_insert(elems_atual, $1, $2); 
-					  }
-					  else {
-					      char *nts = g_hash_table_lookup(elems_atual, $1);
-						  nts = realloc(nts, sizeof(char)*(strlen(nts)+strlen($2)+2));
-						  strcat(nts, ", ");
-						  strcat(nts, $2);
-					  }
-				  }
-				}
-  | UF STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
-  				  if (elems_atual != NULL) {
-					  if (!g_hash_table_contains(elems_atual, $1)) {
-						  g_hash_table_insert(elems_atual, $1, $2); 
-					  }
-					  else {
-					      char *nts = g_hash_table_lookup(elems_atual, $1);
-						  nts = realloc(nts, sizeof(char)*(strlen(nts)+strlen($2)+2));
-						  strcat(nts, ", ");
-						  strcat(nts, $2);
-					  }
-				  }
-				}
-  | TT STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
-  				  if (elems_atual != NULL) {
-					  if (!g_hash_table_contains(elems_atual, $1)) {
-						  g_hash_table_insert(elems_atual, $1, $2); 
-					  }
-					  else {
-					      char *nts = g_hash_table_lookup(elems_atual, $1);
-						  nts = realloc(nts, sizeof(char)*(strlen(nts)+strlen($2)+2));
-						  strcat(nts, ", ");
-						  strcat(nts, $2);
+					      char *strs = g_hash_table_lookup(elems_atual, $1);
+						  asprintf(&strs, "%s, %s", strs, $2);
 					  }
 				  }
 				}
   ;
 
-STRs : STR			{ $$ = $1; }
+STRs : STR			{ asprintf(&$$, "%s", $1); }
      | STRs ',' STR	{ asprintf(&$$, "%s,%s", $1, $3); }
+     ;
+
+TXTs : STR		{ asprintf(&$$, "%s", $1); }
+     | TXTs STR	{ asprintf(&$$, "%s %s", $1, $2); }
      ;
 
 
@@ -147,7 +94,7 @@ static void iterator_dentro(gpointer key, gpointer value, gpointer user_data) {
 
 static void iterator_fora(gpointer key, gpointer value, gpointer user_data) {
 	//printf(user_data, *(gchar*)key, value);
-	printf("Key: %s\n", (char*) key);
+	printf("\nKey: %s\n", (char*) key);
 	g_hash_table_foreach(value, (GHFunc)iterator_dentro, NULL);
 }
 
@@ -167,5 +114,5 @@ int main(){
 }
 
 void yyerror(char* erro){
-	fprintf(stderr, "%s, %s, %d", erro, yytext, yylineno);
+	fprintf(stderr, "%s,%s,%d\n", erro, yytext, yylineno);
 }
