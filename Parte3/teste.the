@@ -1,16 +1,16 @@
-							# diretivas / metadados
-%language PT EN				# linguas: PT EN
-%baselang EN				# lingua de base: EN
-%inv NT BT					# NT, BT são relações inversas a NT b => b BT a
+							
+%language PT EN
+%baselang EN
+%inv NT BT
 
 
-							# conceitos:
-animal						# termo na baselang
-PT animal					# LINGUA termo
-NT cat, dog, cow,			# NT = narrow term = termo específico
+							
+animal						
+PT animal					
+NT cat, dog, cow,			
 	fish, ant
 NT camel
-BT Life being				# BT = broader term = termo genérico
+BT Life being				
 
 cat
 PT gato
@@ -22,17 +22,17 @@ SN [1] animal que tem sete vidas e m(e)ia
 
 Abandono_de_estudos
 MT     Administração da educação
-DA		   dropout
-DA	   Dropout
-EN	   dropout
-EN	   dropout
-ES	   abandono de estudios
-FI	   keskeyttäminen
-FR	   abandon d'études
-IT	   abbandono degli studi
-NL	   voortijdig schoolverlaten
-SV	   avbruten skolgång
-SN	   Refere-se aos educandos que, por incapacidade, falta de meios económicos, etc., não chegam a terminar os seus estudos
-BT    Interrupção de estudos
+DA     dropout
+DA   Dropout
+EN   dropout
+EN   dropout
+ES   abandono de estudios
+FI   keskeyttäminen
+FR   abandon d'études
+IT   abbandono degli studi
+NL   voortijdig schoolverlaten
+SV   avbruten skolgång
+SN   Refere-se aos educandos que, por incapacidade, falta de meios económicos, etc., não chegam a terminar os seus estudos
+BT   Interrupção de estudos
 BT2   Escolaridade
 BT3   Administração da educação
