@@ -273,7 +273,8 @@ void gera_html()
 	//geração da página html com base na estrutura de dados
     FILE* fp = fopen("html_files/index.html", "w+");
 
-    fprintf(fp, "<!DOCTYPE html>\n<html>\n<head>\n\t<meta charset=\"UTF-8\">\n</head>\n<body>\n");
+    fprintf(fp, "<!DOCTYPE html>\n<html>\n<head>\n\t<meta charset=\"UTF-8\">\n\t<title>Index</title>\n</head>\n<body>\n");
+	fprintf(fp, "<h1>Index</h1>");
 
     GHashTableIter iter;
     gpointer key, value;
