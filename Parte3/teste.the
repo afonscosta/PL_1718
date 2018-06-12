@@ -7,13 +7,17 @@
 							# conceitos:
 animal						# termo na baselang
 PT animal					# LINGUA termo
-NT cat, dog, cow, fish, ant			# NT = narrow term = termo específico
+NT cat, dog, cow,			# NT = narrow term = termo específico
+	fish, ant
 NT camel
 BT Life being				# BT = broader term = termo genérico
 							# linha em branco : separador de conceitos
 cat
 PT gato
 BT animal
-SN animal que tem sete vidas e m(e)ia		# scope note = nota explicativa
+SN [1] animal que tem sete vidas e m(e)ia
+	[2] animal que tem sete vidas e m(e)ia		# scope note = nota explicativa
+	[3] animal que tem sete		# scope note = nota explicativa
+	vidas e m(e)ia
 
 #comentário					# desde o símbolo '#' até ao fim da linha
