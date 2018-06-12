@@ -15,13 +15,15 @@ extern char *yytext;
 extern int yylineno;
 void yyerror(char*);
 
+void add_STR(GHashTable* hash_conceito, char* id_inv);
+void add_conceito(char* id_fora, char* id_inv);
+void complete_inv(char* id, GArray* strs_atual);
+void fechaConceito(FILE* fp_aux);
+void geraConceito(FILE* fp_aux, gpointer value);
+void gera_html();
 char* remove_esp_ex( char* string);
-void complete_inv(char* conceito_atual, char* id, GArray* strs_atual);
 void removeSpaces(char *str);
 char** str_split(char* a_str, const char a_delim);
-static void iterator_dentro(gpointer key, gpointer value, gpointer user_data);
-static void iterator_fora(gpointer key, gpointer value, gpointer user_data);
-void print_hash(GHashTable* hash);
 
 GHashTable* conceitos;
 GHashTable* elems_atual;
@@ -76,13 +78,13 @@ E : MT			{ removeSpaces($1);
 						  GArray* strs = g_array_new(FALSE, FALSE, sizeof(char*));
 						  g_array_append_val(strs, $2);
 						  g_hash_table_insert(elems_atual, $1, strs); 
-						  complete_inv(conceito_atual, $1, strs);
+						  complete_inv($1, strs);
 					  }
 					  else {
 						  GArray* strs = (GArray*) g_hash_table_lookup(elems_atual, $1);
 						  g_array_append_val(strs, $2);
 						  g_hash_table_insert(elems_atual, $1, strs); 
-						  complete_inv(conceito_atual, $1, strs);
+						  complete_inv($1, strs);
 					  }
 				  }
 				}
@@ -97,7 +99,7 @@ E : MT			{ removeSpaces($1);
 							  g_array_append_val(strs, tokens[i]);
 						  }
 						  g_hash_table_insert(elems_atual, $1, strs); 
-						  complete_inv(conceito_atual, $1, strs);
+						  complete_inv($1, strs);
 					  }
 					  else {
 						  GArray* strs = (GArray*) g_hash_table_lookup(elems_atual, $1);
@@ -107,7 +109,7 @@ E : MT			{ removeSpaces($1);
 							  g_array_append_val(strs, tokens[i]);
 						  }
 						  g_hash_table_insert(elems_atual, $1, strs); 
-						  complete_inv(conceito_atual, $1, strs);
+						  complete_inv($1, strs);
 					  }
 				  }
 				}
@@ -176,23 +178,6 @@ char** str_split(char* a_str, const char a_delim)
     return result;
 }
 
-static void iterator_dentro(gpointer key, gpointer value, gpointer user_data) {
-	printf(user_data, *(gchar*)key, value);
-	printf("Key: %s || Value: %s\n", (char*) key, (char*) value);
-}
-
-static void iterator_fora(gpointer key, gpointer value, gpointer user_data) {
-	//printf(user_data, *(gchar*)key, value);
-	printf("\nKey: %s\n", (char*) key);
-	g_hash_table_foreach(value, (GHFunc)iterator_dentro, NULL);
-}
-
-void print_hash(GHashTable* hash){
-	printf("\n==== Começou ====\n");
-	g_hash_table_foreach(hash, (GHFunc)iterator_fora, NULL);
-	printf("==== Acabou ====\n\n");
-}
-
 char* remove_esp_ex( char* string){
 
 	if(string)
@@ -225,9 +210,42 @@ void removeSpaces(char *str)
     str[count] = '\0';
 }
 
-void complete_inv(char* conceito_atual, char* id, GArray* strs_atual)
+void add_STR(GHashTable* hash_conceito, char* id_inv)
 {
 	int existe = 0;
+	GArray* strs_dest = (GArray*) g_hash_table_lookup(hash_conceito, id_inv);
+	if (strs_dest != NULL)
+	{
+		for (int i = 0; i < ((GArray*) strs_dest)->len; i++)
+		{
+			char *str = g_array_index((GArray*) strs_dest, char*, i);
+			if (strcmp(str, conceito_atual) == 0)
+				existe = 1;
+		}
+		if (!existe)
+		{
+			g_array_append_val(strs_dest, conceito_atual);
+		}
+	}
+	else
+	{
+		strs_dest = g_array_new(FALSE, FALSE, sizeof(char*));
+		g_array_append_val(strs_dest, conceito_atual);
+	}
+	g_hash_table_insert(hash_conceito, id_inv, strs_dest); 
+}
+
+void add_conceito(char* id_fora, char* id_inv) 
+{
+	GArray* strs_dest = g_array_new(FALSE, FALSE, sizeof(char*));
+	g_array_append_val(strs_dest, conceito_atual);
+	GHashTable* novo_conceito = g_hash_table_new(g_str_hash, g_str_equal);
+	g_hash_table_insert(novo_conceito, id_inv, strs_dest); 
+	g_hash_table_insert(conceitos, id_fora, novo_conceito); 
+}
+
+void complete_inv(char* id, GArray* strs_atual)
+{
 	char *id_fora;
 	GHashTable* hash_conceito;
 	//Ver o ID do inverso
@@ -241,31 +259,52 @@ void complete_inv(char* conceito_atual, char* id, GArray* strs_atual)
 			hash_conceito = g_hash_table_lookup(conceitos, id_fora);
 			if (hash_conceito != NULL)
 			{
-				GArray* strs_dest = (GArray*) g_hash_table_lookup(hash_conceito, id_inv);
-				for (int i = 0; i < ((GArray*) strs_dest)->len; i++)
-				{
-					char *str = g_array_index((GArray*) strs_dest, char*, i);
-					if (strcmp(str, conceito_atual) == 0)
-						existe = 1;
-				}
-				if (!existe)
-				{
-					//Acrescenta ID inverso com o MT
-					g_array_append_val(strs_dest, conceito_atual);
-				}
-				g_hash_table_insert(hash_conceito, id_inv, strs_dest); 
+				add_STR(hash_conceito, id_inv);
 			}
 			else
 			{
-				GArray* strs_dest = g_array_new(FALSE, FALSE, sizeof(char*));
-				//Acrescenta ID inverso com o MT
-				g_array_append_val(strs_dest, conceito_atual);
-				GHashTable* novo_conceito = g_hash_table_new(g_str_hash, g_str_equal);
-				g_hash_table_insert(novo_conceito, id_inv, strs_dest); 
-			  	g_hash_table_insert(conceitos, id_fora, novo_conceito); 
+				add_conceito(id_fora, id_inv);
 			}
 		}
 	}
+}
+
+void geraConceito(FILE* fp_aux, gpointer value){
+
+    GHashTableIter iter1;
+    gpointer key1, value1;
+    g_hash_table_iter_init (&iter1, value);
+
+    while (g_hash_table_iter_next (&iter1, &key1, &value1)){
+
+        fprintf(fp_aux, "\t<p>%s: ", (char*) key1);
+
+        for (int i = 0; i < ((GArray*) value1)->len; i++)
+        {
+            char *id = g_array_index((GArray*) value1, char*, i);
+            // Se estiver nos conceitos gera o href
+            if (g_hash_table_contains(conceitos, id) && i == 0){
+                fprintf(fp_aux, "<a href=\"%s.html\">%s</a>", id, id);
+            }
+            else if (g_hash_table_contains(conceitos, id)){
+                fprintf(fp_aux, ", <a href=\"%s.html\">%s</a>", id, id);
+            }
+            // Gera a palavra normal
+            else if (i == 0){
+                fprintf(fp_aux, "%s", id);
+            }
+            else {
+                fprintf(fp_aux, ", %s", id);
+            }
+        }
+        fprintf(fp_aux, "</p>\n");
+    }
+}
+
+void fechaConceito(FILE* fp_aux){
+    //fecho do ficheiro de inicialização
+    fprintf(fp_aux, "</body>\n</html>");
+    fclose(fp_aux);
 }
 
 void gera_html()
@@ -295,45 +334,15 @@ void gera_html()
         fprintf(fp_aux, "<h1>%s</h1>", (char*) key);
         fprintf(fp_aux, "<p> <a href=\"index.html\">Index</a> </p>");
 
-        GHashTableIter iter1;
-        gpointer key1, value1;
-		g_hash_table_iter_init (&iter1, value);
-
-        while (g_hash_table_iter_next (&iter1, &key1, &value1)){
-
-            fprintf(fp_aux, "\t<p>%s: ", (char*) key1);
-
-			for (int i = 0; i < ((GArray*) value1)->len; i++)
-			{
-				char *id = g_array_index((GArray*) value1, char*, i);
-				// Se estiver nos conceitos gera o href
-                if (g_hash_table_contains(conceitos, id) && i == 0){
-                    fprintf(fp_aux, "<a href=\"%s.html\">%s</a>", id, id);
-                }
-                else if (g_hash_table_contains(conceitos, id)){
-                    fprintf(fp_aux, ", <a href=\"%s.html\">%s</a>", id, id);
-                }
-				// Gera a palavra normal
-                else if (i == 0){
-                    fprintf(fp_aux, "%s", id);
-                }
-                else {
-                    fprintf(fp_aux, ", %s", id);
-                }
-			}
-            fprintf(fp_aux, "</p>\n");
-        }
-
-        //fecho do ficheiro de inicialização
-        fprintf(fp_aux, "</body>\n</html>");
-        fclose(fp_aux);
+        geraConceito(fp_aux, value);
+        fechaConceito(fp_aux);
     }
-
     fprintf(fp, "</body>\n</html>");
     fclose(fp);
 }
 
 int main(){
+
 	conceitos = g_hash_table_new(g_str_hash, g_str_equal);
 	elems_atual = g_hash_table_new(g_str_hash, g_str_equal);
 	descriptions = g_hash_table_new(g_str_hash, g_str_equal);
@@ -341,9 +350,8 @@ int main(){
 
 	yyparse();
 
-	//g_hash_table_foreach(conceitos, (GHFunc)iterator_fora, NULL);
-
 	gera_html();
+
 	return 0;
 }
 
