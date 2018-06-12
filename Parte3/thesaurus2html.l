@@ -3,7 +3,7 @@
 %option noyy_top_state
 %option nounput
 %option noinput
-%x context_id context_sn context_inv
+%x state_id state_sn state_inv
 
 %{
 #include "y.tab.h"
