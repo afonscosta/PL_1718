@@ -11,7 +11,7 @@ NT cat, dog, cow,			# NT = narrow term = termo específico
 	fish, ant
 NT camel
 BT Life being				# BT = broader term = termo genérico
-							# linha em branco : separador de conceitos
+
 cat
 PT gato
 BT animal
