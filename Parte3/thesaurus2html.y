@@ -39,7 +39,7 @@ GArray* strs;
 
 
 Cs : Cs '\n' C 
-   | C '\n'
+   | C
    ;
 
 C : Es
