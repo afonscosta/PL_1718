@@ -20,10 +20,19 @@ SN [1] animal que tem sete vidas e m(e)ia
 	[3] animal que tem sete		# scope note = nota explicativa
 	vidas e m(e)ia
 
-carro
-PT gato
-BT animal
-SN [1] animal que tem sete vidas e m(e)ia
-	[2] animal que tem sete vidas e m(e)ia		# scope note = nota explicativa
-	[3] animal que tem sete		# scope note = nota explicativa
-	vidas e m(e)ia
+Abandono_de_estudos
+MT     Administração da educação
+DA		   dropout
+DA	   Dropout
+EN	   dropout
+EN	   dropout
+ES	   abandono de estudios
+FI	   keskeyttäminen
+FR	   abandon d'études
+IT	   abbandono degli studi
+NL	   voortijdig schoolverlaten
+SV	   avbruten skolgång
+SN	   Refere-se aos educandos que, por incapacidade, falta de meios económicos, etc., não chegam a terminar os seus estudos
+BT    Interrupção de estudos
+BT2   Escolaridade
+BT3   Administração da educação
