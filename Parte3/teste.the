@@ -19,3 +19,11 @@ SN [1] animal que tem sete vidas e m(e)ia
 	[2] animal que tem sete vidas e m(e)ia		# scope note = nota explicativa
 	[3] animal que tem sete		# scope note = nota explicativa
 	vidas e m(e)ia
+
+carro
+PT gato
+BT animal
+SN [1] animal que tem sete vidas e m(e)ia
+	[2] animal que tem sete vidas e m(e)ia		# scope note = nota explicativa
+	[3] animal que tem sete		# scope note = nota explicativa
+	vidas e m(e)ia

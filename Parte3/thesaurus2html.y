@@ -22,7 +22,7 @@ GArray* strs;
 
 %}
 
-%token MT STR ID ERRO SN
+%token MT STR ID ERRO SN TOP ENC
 
 %union {
 	char* mt;
@@ -32,26 +32,26 @@ GArray* strs;
 
 %type <id> ID SN
 %type <mt> MT
-%type <str> STR STRs TXTs
+%type <str> STR STRs TXTs TOP ENC
 
 
 %%
 
 
-Cs : Cs '\n' C  { printf("Entrou no 'Cs \\n C'\n"); }
-   | C			{ printf("Entrou no 'C'\n"); }
+Cs : Cs '\n' C  
+   | C		
    ;
 
-C : Es  		{ printf("Entrou no 'Es'\n"); }
+C : Es  
   ;
 
-Es : Es E  		{ printf("Entrou no 'Es E'\n"); }
-   | E 			{ printf("Entrou no 'E'\n"); }
+Es : Es E  
+   | E 	
    ;
 
-E : MT			{ printf("Entrou no MT: %s\n", $1); conceito_atual = strdup($1); 
+E : MT			{ conceito_atual = strdup($1); 
   				  g_hash_table_insert(conceitos, conceito_atual, g_hash_table_new(g_str_hash, g_str_equal)); }
-  | SN TXTs		{ printf("Entrou no SN: %s\n", $2); GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
+  | SN TXTs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
   				  if (elems_atual != NULL) {
 					  if (!g_hash_table_contains(elems_atual, $1)) {
 						  g_hash_table_insert(elems_atual, $1, $2); 
@@ -64,7 +64,7 @@ E : MT			{ printf("Entrou no MT: %s\n", $1); conceito_atual = strdup($1);
 					  }
 				  }
 				}
-  | ID STRs		{ printf("Entrou no %s: %s\n", $1, $2); GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
+  | ID STRs		{ GHashTable* elems_atual = g_hash_table_lookup(conceitos, conceito_atual);
   				  if (elems_atual != NULL) {
 					  if (!g_hash_table_contains(elems_atual, $1)) {
 						  g_hash_table_insert(elems_atual, $1, $2); 
